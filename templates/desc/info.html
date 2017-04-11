@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <link rel="stylesheet" href="/static/style/css/ch-ui.admin.css">
+    <link rel="stylesheet" href="/static/style/font/css/font-awesome.min.css">
+    <script type="text/javascript" src="/static/style/js/jquery.js"></script>
+    <script type="text/javascript" src="/static/style/js/ch-ui.admin.js"></script>
+</head>
+<body>
+<!--面包屑导航 开始-->
+<div class="crumb_warp">
+    <!--<i class="fa fa-bell"></i> 欢迎使用登陆网站后台，建站的首选工具。-->
+    <i class="fa fa-home"></i> <a href="#">首页</a> &raquo; <a href="#">网站描述</a> &raquo; 描述列表
+</div>
+<!--面包屑导航 结束-->
+
+<!--搜索结果页面 列表 开始-->
+<form action="#" method="post">
+    <div class="result_wrap">
+        <!--快捷导航 开始-->
+        <div class="result_content">
+            <div class="short_wrap">
+                <a href="#"><i class="fa fa-plus"></i>修改描述</a>
+            </div>
+        </div>
+        <!--快捷导航 结束-->
+    </div>
+
+    <div class="result_wrap">
+        <div class="result_content">
+            <table class="list_tab">
+                <tr>
+                    <td class="tc">ID</td>
+                    <th>内容</th>
+                    <th>更新时间</th>
+                    <th>操作</th>
+                </tr>
+                {% for desc in descs %}
+                <tr>
+                    <td class="tc">{{ desc.id }}</td>
+                    <td>{{ desc.content }}</td>
+                    <td>{{ desc.pub_date }}</td>
+                    <td>
+                        <i class="fa fa-pencil-square-o" aria-hidden="true"></i>
+                    </td>
+                </tr>
+                {% end %}
+            </table>
+        </div>
+    </div>
+</form>
+<!--搜索结果页面 列表 结束-->
+
+</body>
+</html>

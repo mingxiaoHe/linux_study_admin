@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <link rel="stylesheet" href="/static/style/css/ch-ui.admin.css">
+    <link rel="stylesheet" href="/static/style/font/css/font-awesome.min.css">
+    <script type="text/javascript" src="/static/style/js/jquery.js"></script>
+    <link rel="stylesheet" href="/static/style/css/bootstrap-theme.min.css">
+    <link rel="stylesheet" href="/static/style/css/bootstrap.min.css">
+    <script type="text/javascript" src="/static/style/js/bootstrap.min.js"></script>
+    <script type="text/javascript" src="/static/style/js/ch-ui.admin.js"></script>
+</head>
+<body>
+<!--面包屑导航 开始-->
+<div class="crumb_warp">
+    <!--<i class="fa fa-bell"></i> 欢迎使用登陆网站后台，建站的首选工具。-->
+    <i class="fa fa-home"></i> <a href="#">首页</a> &raquo; <a href="#">用户管理</a> &raquo; 管理员
+</div>
+<!--面包屑导航 结束-->
+
+<!--结果页快捷搜索框 开始-->
+<div class="search_wrap">
+    <form action="" method="post">
+        <table class="search_tab">
+            <tr>
+                <th width="70">关键字:</th>
+                <td><input type="text" name="keywords" placeholder="输入管理员名称"></td>
+                <td><input type="submit" name="sub" value="查询"></td>
+            </tr>
+        </table>
+    </form>
+</div>
+<!--结果页快捷搜索框 结束-->
+
+<!--搜索结果页面 列表 开始-->
+<form action="#" method="post">
+    <div class="result_wrap">
+        <!--快捷导航 开始-->
+        <div class="result_content">
+            <div class="short_wrap">
+                <a href="#"><i class="fa fa-plus"></i>新增用户</a>
+                <a href="#"><i class="fa fa-recycle"></i>批量删除</a>
+            </div>
+        </div>
+        <!--快捷导航 结束-->
+    </div>
+
+    <div class="result_wrap">
+        <div class="result_content">
+            <table class="list_tab">
+                <tr>
+                    <th class="tc" width="5%"><input type="checkbox" name=""></th>
+                    <th class="tc">ID</th>
+                    <th>用户</th>
+                    <th>角色</th>
+                    <th>邮箱</th>
+                    <th>更新时间</th>
+                    <th>操作</th>
+                </tr>
+
+                {% for admin in admins %}
+                <tr>
+                    <td class="tc"><input type="checkbox" name="id[]" value="59"></td>
+
+                    <td class="tc">{{ admin.id }}</td>
+                    <td>{{ admin.username }}</td>
+                    <td>{{ admin.roles[0].name }}</td>
+                    <td>{{ admin.email }}</td>
+                    <td>2014-03-15 21:11:01</td>
+                    <td>
+                        <i class="fa fa-pencil-square-o" aria-hidden="true" class="btn btn-primary btn-lg"
+                           data-toggle="modal" data-target="#myModal"></i>
+                        <i class="fa fa-key" aria-hidden="true" class="btn btn-primary btn-lg"
+                           data-toggle="modal" data-target="#myModal"></i>
+                        <i class="fa fa-trash" aria-hidden="true" class="btn btn-primary btn-lg"
+                           data-toggle="modal" data-target="#myModal"></i>
+                    </td>
+                </tr>
+                {% end %}
+            </table>
+
+
+            <div class="page_nav">
+                <div>
+                    <a class="first" href="/Admin/Tag/index/p/1.html">第一页</a>
+                    <a class="prev" href="/Admin/Tag/index/p/2.html">上一页</a>
+                    <a class="num" href="/Admin/Tag/index/p/1.html">1</a>
+                    <a class="num" href="/Admin/Tag/index/p/2.html">2</a>
+                    <span class="current">3</span>
+                    <a class="num" href="/Admin/Tag/index/p/4.html">4</a>
+                    <a class="num" href="/Admin/Tag/index/p/5.html">5</a>
+                    <a class="next" href="/Admin/Tag/index/p/4.html">下一页</a>
+                    <a class="end" href="/Admin/Tag/index/p/5.html">最后一页</a>
+                    <span class="rows">5 条记录</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
+<!--搜索结果页面 列表 结束-->
+<div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
+                        aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title" id="myModalLabel">Modal title</h4>
+            </div>
+            <div class="modal-body">
+                ...
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary" data-dismiss="modal">Save changes</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+</body>
+<script>
+    var objEdit = document.getElementsByClassName("fa-pencil-square-o");
+    for (var i = 0; i < objEdit.length; i++) {
+        objEdit[i].onclick = function () {
+            var objTr = this.parentNode.parentNode;
+            var objTds = objTr.getElementsByTagName('td');
+            var userId= objTds[1].innerHTML;
+            var userVal = objTds[2].innerHTML;
+            var nameVal = objTds[3].innerHTML;
+            var emailVal = objTds[4].innerHTML;
+            var objModalBody = document.getElementsByClassName('modal-body')[0];
+            objModalBody.innerHTML = "<label>username:</label><br/><input type='text' name='username' value='" + userVal + "'/><br/>";
+            objModalBody.innerHTML += "<label>role:</label><br/><input type='text' name='role' value='" + nameVal + "'/><br/>";
+            objModalBody.innerHTML += "<label>email:</label><br/><input type='text' name='email' value='" + emailVal + "'/><br/>";
+            var objBtn=document.getElementById('myModal').getElementsByClassName('btn btn-primary')[0];
+            objBtn.onclick= function () {
+                    a({
+                    id:userId,
+                    username:document.getElementsByName('username')[0].value,
+                    role:document.getElementsByName('role')[0].value,
+                    email:document.getElementsByName('email')[0].value
+                },'/ajax/change_user')
+            }
+        }
+    }
+
+    var objUpdate = document.getElementsByClassName("fa fa-key");
+    for (var i = 0; i < objUpdate.length; i++) {
+        objUpdate[i].onclick = function () {
+            var objTr = this.parentNode.parentNode;
+            var objTds = objTr.getElementsByTagName('td');
+            var userId= objTds[1].innerHTML;
+            var userVal = objTds[2].innerHTML;
+            var objModalBody = document.getElementsByClassName('modal-body')[0];
+            objModalBody.innerHTML = "<label>username:</label><br/><input type='text' name='id' value='" + userVal + "'><br/>";
+            objModalBody.innerHTML += "<label>newPassword:</label><br/><input name='password' type='text' /><br/>";
+            objModalBody.innerHTML += "<label>rePassword:</label><br/><input name='repassword' type='text' /><br/>";
+            var objBtn=document.getElementById('myModal').getElementsByClassName('btn btn-primary')[0];
+            objBtn.onclick= function () {
+                    a({
+                    id:userId,
+                    password:document.getElementsByName('password')[0].value,
+                    repassword:document.getElementsByName('repassword')[0].value
+                },'/ajax/change_pass')
+            }
+        }
+    }
+
+    var objDelete = document.getElementsByClassName("fa fa-trash");
+    for (var i = 0; i < objDelete.length; i++) {
+        objDelete[i].onclick = function () {
+            var objTr = this.parentNode.parentNode;
+            var objTds = objTr.getElementsByTagName('td');
+            var userId= objTds[1].innerHTML;
+            var objModalBody = document.getElementsByClassName('modal-body')[0];
+            var objBtn=document.getElementById('myModal').getElementsByClassName('btn btn-primary')[0];
+            objModalBody.innerHTML = "confirm Delete?";
+            objBtn.onclick= function () {
+                    a({
+                    id:userId
+                },'/ajax/delete_user')
+            }
+        }
+    }
+
+    function getCookie(name) {
+        var r = document.cookie.match("\\b" + name + "=([^;]*)\\b");
+        return r ? r[1] : undefined;
+    }
+    var a = function (data, url) {
+        data._xsrf = getCookie("_xsrf");
+        console.log(data._xsrf);
+        $.ajax({
+            url: url,
+            type: 'POST', //GET
+            async: true,    //或false,是否异步
+            data: data,
+            timeout: 5000,    //超时时间
+            dataType: 'json',    //返回的数据格式：json/xml/html/script/jsonp/text
+
+            success: function (data) {
+                console.log(data.status);
+            },
+            error: function (xhr, textStatus) {
+                console.log(xhr);
+                console.log(textStatus);
+            }
+        });
+
+    }
+</script>
+</html>

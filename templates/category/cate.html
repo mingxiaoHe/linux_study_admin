@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <link rel="stylesheet" href="/static/style/css/ch-ui.admin.css">
+    <link rel="stylesheet" href="/static/style/font/css/font-awesome.min.css">
+    <script type="text/javascript" src="/static/style/js/jquery.js"></script>
+    <script type="text/javascript" src="/static/style/js/ch-ui.admin.js"></script>
+</head>
+<body>
+<!--面包屑导航 开始-->
+<div class="crumb_warp">
+    <!--<i class="fa fa-bell"></i> 欢迎使用登陆网站后台，建站的首选工具。-->
+    <i class="fa fa-home"></i> <a href="#">首页</a> &raquo; <a href="#">文章管理</a> &raquo; {{ cate_articles[0].category.name }}
+</div>
+<!--面包屑导航 结束-->
+
+<!--结果页快捷搜索框 开始-->
+<div class="search_wrap">
+    <form action="" method="post">
+        <table class="search_tab">
+            <tr>
+                <th width="70">关键字:</th>
+                <td><input type="text" name="keywords" placeholder="输入标题名称"></td>
+                <td><input type="submit" name="sub" value="查询"></td>
+            </tr>
+        </table>
+    </form>
+</div>
+<!--结果页快捷搜索框 结束-->
+
+<!--搜索结果页面 列表 开始-->
+<form action="#" method="post">
+    <div class="result_wrap">
+        <!--快捷导航 开始-->
+        <div class="result_content">
+            <div class="short_wrap">
+                <a href="/article/add.html"><i class="fa fa-plus"></i>新增文章</a>
+                <a href="#"><i class="fa fa-recycle"></i>批量删除</a>
+            </div>
+        </div>
+        <!--快捷导航 结束-->
+    </div>
+
+    <div class="result_wrap">
+        <div class="result_content">
+            <table class="list_tab">
+                <tr>
+                    <th class="tc" width="5%"><input type="checkbox" name=""></th>
+                    <th class="tc">ID</th>
+                    <th>标题</th>
+                    <th>阅读数</th>
+                    <th>创建时间</th>
+                    <th>最后修改时间</th>
+                    <th>操作</th>
+                </tr>
+                {% for article in cate_articles %}
+                <tr>
+                    <td class="tc"><input type="checkbox" name="id[]" value="59"></td>
+
+                    <td class="tc">{{ article.id }}</td>
+                    <td><a target="_blank" href="http://127.0.0.1:8000/post/{{ article.id }}.html">{{ article.title }}</a></td>
+                    <td>{{ article.click_count }}</td>
+                    <td>{{ article.pub_date }}</td>
+                    <td>{{ article.last_modify_date }}</td>
+                    <td>
+                        <a href="/article/edit/{{ article.id }}.html"><i class="fa fa-pencil-square-o" aria-hidden="true"></i></a>
+                        <a href=""><i class="fa fa-trash" aria-hidden="true"></i></a>
+                    </td>
+                </tr>
+                {% end %}
+            </table>
+
+            <div class="page_nav">
+                <div>
+                    {% for line in page_string %}
+                        {% raw line %}
+                    {% end %}
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
+<!--搜索结果页面 列表 结束-->
+
+
+</body>
+</html>

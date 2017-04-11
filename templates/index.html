@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <link rel="stylesheet" href="/static/style/css/ch-ui.admin.css">
+    <link rel="stylesheet" href="/static/style/font/css/font-awesome.min.css">
+    <script type="text/javascript" src="/static/style/js/jquery.js"></script>
+
+</head>
+<body>
+<!--头部 开始-->
+<div class="top_box">
+    <div class="top_left">
+        <div class="logo">后台管理模板</div>
+        <ul>
+            <li><a href="http://127.0.0.1:8000">网站首页</a></li>
+        </ul>
+    </div>
+    <div class="top_right">
+        <ul>
+            <li>管理员：admin</li>
+            <li><a href="pass.html" target="main">修改密码</a></li>
+            <li><a href="/logout">退出</a></li>
+        </ul>
+    </div>
+</div>
+<!--头部 结束-->
+
+<!--左侧导航 开始-->
+<div class="menu_box">
+    <ul>
+        <li>
+            <h3><i class="fa fa-fw fa-clipboard"></i>用户管理</h3>
+            <ul class="sub_menu">
+                <li><a href="/user/admin.html" target="main"><i class="fa fa-fw fa-list-ul"></i>管理员</a></li>
+                <li><a href="/user/ordinary.html" target="main"><i class="fa fa-fw fa-list-ul"></i>普通用户</a></li>
+            </ul>
+        </li>
+
+        <li>
+            <h3><i class="fa fa-fw fa-clipboard"></i>分类管理</h3>
+            <ul class="sub_menu">
+                <li><a href="/category/info/1.html" target="main"> <i class="fa fa-fw fa-list-ul"></i> 分类列表</a></li>
+            </ul>
+        </li>
+
+        <li>
+            <h3><i class="fa fa-fw fa-clipboard"></i>文章管理</h3>
+            <ul class="sub_menu">
+                <li><a href="/article/info/1.html" target="main"><i class="fa fa-fw fa-list-ul"></i>文章列表</a></li>
+                <li><a href="/article/add.html" target="main"><i class="fa fa-fw fa-plus-square"></i>添加文章</a></li>
+            </ul>
+        </li>
+
+
+        <li>
+            <h3><i class="fa fa-fw fa-clipboard"></i>友链管理</h3>
+            <ul class="sub_menu">
+                <li><a href="/links/info/1.html" target="main"><i class="fa fa-fw fa-list-ul"></i>友链列表</a></li>
+            </ul>
+        </li>
+
+        <li>
+            <h3><i class="fa fa-fw fa-clipboard"></i>标签管理</h3>
+            <ul class="sub_menu">
+
+            </ul>
+        </li>
+
+        <li>
+            <h3><i class="fa fa-fw fa-clipboard"></i>网站描述</h3>
+            <ul class="sub_menu">
+                <li><a href="/desc/info.html" target="main"><i class="fa fa-fw fa-plus-square"></i>修改描述</a></li>
+            </ul>
+        </li>
+
+    </ul>
+</div>
+<!--左侧导航 结束-->
+
+<!--主体部分 开始-->
+<div class="main_box">
+    <iframe src="" frameborder="0" width="100%" height="100%" name="main"></iframe>
+</div>
+<!--主体部分 结束-->
+
+<!--底部 开始-->
+<div class="bottom_box">
+    CopyRight © 2015. Powered By <a href="http://www.houdunwang.com">http://www.houdunwang.com</a>.
+</div>
+<!--底部 结束-->
+</body>
+<script>
+
+    // 点击文章管理时，获取分类信息。
+//    var objUpdate=document.getElementsByClassName('fa fa-fw fa-clipboard')[1].parentNode.parentNode;
+//    console.log(objUpdate);
+//    objUpdate.onclick = function () {
+//        /a('/ajax/get_category');
+//    };
+    a('/ajax/get_category');
+    function a(url) {
+        $.ajax({
+            url: url,
+            type: 'GET', //GET
+            async: true,    //或false,是否异步
+            timeout: 5000,    //超时时间
+            dataType: 'json',    //返回的数据格式：json/xml/html/script/jsonp/text
+
+            success: function (data) {
+                var objUpdate=document.getElementsByClassName('fa fa-fw fa-clipboard')[1].parentNode.parentNode;
+                var objUl=objUpdate.getElementsByTagName('ul')[0];
+                objUl.innerHTML=' <li><a href="/category/info/1.html" target="main"> <i class="fa fa-fw fa-list-ul"></i> 分类列表</a></li>';
+                for(var i=0;i<data.length;i++){
+                    objUl.innerHTML+='  <li><a href="/category/'+data[i].basename+ '/' + '1.html" target="main"> <i class="fa fa-fw fa-list-ul"></i> '+data[i].name+'</a></li> ';
+                }
+            },
+            error: function (xhr, textStatus) {
+                console.log(xhr);
+                console.log(textStatus);
+            }
+        });
+
+    }
+
+    b('/ajax/get_tag');
+    function b(url) {
+        $.ajax({
+            url: url,
+            type: 'GET', //GET
+            async: true,    //或false,是否异步
+            timeout: 5000,    //超时时间
+            dataType: 'json',    //返回的数据格式：json/xml/html/script/jsonp/text
+
+            success: function (data) {
+                var objUpdate=document.getElementsByClassName('fa fa-fw fa-clipboard')[4].parentNode.parentNode;
+                var objUl=objUpdate.getElementsByTagName('ul')[0];
+                objUl.innerHTML=' <li><a href="/tag/info/1.html" target="main"> <i class="fa fa-fw fa-list-ul"></i> 标签列表</a></li>';
+                for(var i=0;i<data.length;i++){
+                    objUl.innerHTML+='  <li><a href="/tag/'+data[i]+ '/' + '1.html" target="main"> <i class="fa fa-fw fa-list-ul"></i> '+data[i]+'</a></li> ';
+                }
+            },
+            error: function (xhr, textStatus) {
+                console.log(xhr);
+                console.log(textStatus);
+            }
+        });
+
+    }
+</script>
+<script type="text/javascript" src="/static/style/js/ch-ui.admin.js"></script>
+</html>
