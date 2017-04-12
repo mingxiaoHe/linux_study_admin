@@ -29,6 +29,12 @@ articleidToTagid = Table('articleidToTagid', Base.metadata,
                          Column('tagid', Integer, ForeignKey('tags.id')),
                          )
 
+# 用户收藏的文章 多对多
+useridToArticleid = Table('useridToArticleid', Base.metadata,
+                          Column('userid', Integer, ForeignKey('users.id')),
+                          Column('articleid', Integer, ForeignKey('articles.id')),
+                          )
+
 
 # 用户-->文章  一个用户收藏多个文章，一个文章被多个用户收藏，多对多关系
 
@@ -41,9 +47,13 @@ class User(Base):
     username = Column(String(32), nullable=False, unique=True)
     password = Column(String(32), nullable=False)
     email = Column(String(32), nullable=False, unique=True)
+    create_date = Column(DateTime)
 
     articles = relationship('Article', backref='user')
     roles = relationship('Role', secondary=useridToRoleid, backref='users')
+
+    collections = relationship('Article', cascade="save-update, merge", secondary=useridToArticleid, backref='users')
+
 
     def __repr__(self):
         return "<%s users.username: %s>" % (self.id, self.username)

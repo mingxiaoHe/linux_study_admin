@@ -12,7 +12,6 @@
 
 //左侧点击事件
 $(function(){
-    console.log("2");
 	$('.sub_menu').find('li').click(function(){
 		$(this).parents('.menu_box').find('li').removeClass('on');
 		$(this).addClass('on');
@@ -39,7 +38,7 @@ $(function(){
 
 //列表页点击全选按钮
 $(function(){
-	$('.list_tab').find('tr').find('[type=checkbox]').click(function(){
+	$('.list_tab').find('tr').find('th').find('[type=checkbox]').click(function(){
 		$('.list_tab').find('td').find('[type=checkbox]').prop('checked',$(this).prop('checked'));
 	});
 })

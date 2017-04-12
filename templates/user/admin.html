@@ -18,88 +18,71 @@
 </div>
 <!--面包屑导航 结束-->
 
-<!--结果页快捷搜索框 开始-->
-<div class="search_wrap">
-    <form action="" method="post">
-        <table class="search_tab">
-            <tr>
-                <th width="70">关键字:</th>
-                <td><input type="text" name="keywords" placeholder="输入管理员名称"></td>
-                <td><input type="submit" name="sub" value="查询"></td>
-            </tr>
-        </table>
-    </form>
-</div>
-<!--结果页快捷搜索框 结束-->
-
 <!--搜索结果页面 列表 开始-->
-<form action="#" method="post">
-    <div class="result_wrap">
-        <!--快捷导航 开始-->
-        <div class="result_content">
-            <div class="short_wrap">
-                <a href="#"><i class="fa fa-plus"></i>新增用户</a>
-                <a href="#"><i class="fa fa-recycle"></i>批量删除</a>
-            </div>
-        </div>
-        <!--快捷导航 结束-->
-    </div>
-
-    <div class="result_wrap">
-        <div class="result_content">
-            <table class="list_tab">
-                <tr>
-                    <th class="tc" width="5%"><input type="checkbox" name=""></th>
-                    <th class="tc">ID</th>
-                    <th>用户</th>
-                    <th>角色</th>
-                    <th>邮箱</th>
-                    <th>更新时间</th>
-                    <th>操作</th>
-                </tr>
-
-                {% for admin in admins %}
-                <tr>
-                    <td class="tc"><input type="checkbox" name="id[]" value="59"></td>
-
-                    <td class="tc">{{ admin.id }}</td>
-                    <td>{{ admin.username }}</td>
-                    <td>{{ admin.roles[0].name }}</td>
-                    <td>{{ admin.email }}</td>
-                    <td>2014-03-15 21:11:01</td>
-                    <td>
-                        <i class="fa fa-pencil-square-o" aria-hidden="true" class="btn btn-primary btn-lg"
-                           data-toggle="modal" data-target="#myModal"></i>
-                        <i class="fa fa-key" aria-hidden="true" class="btn btn-primary btn-lg"
-                           data-toggle="modal" data-target="#myModal"></i>
-                        <i class="fa fa-trash" aria-hidden="true" class="btn btn-primary btn-lg"
-                           data-toggle="modal" data-target="#myModal"></i>
-                    </td>
-                </tr>
-                {% end %}
-            </table>
-
-
-            <div class="page_nav">
-                <div>
-                    <a class="first" href="/Admin/Tag/index/p/1.html">第一页</a>
-                    <a class="prev" href="/Admin/Tag/index/p/2.html">上一页</a>
-                    <a class="num" href="/Admin/Tag/index/p/1.html">1</a>
-                    <a class="num" href="/Admin/Tag/index/p/2.html">2</a>
-                    <span class="current">3</span>
-                    <a class="num" href="/Admin/Tag/index/p/4.html">4</a>
-                    <a class="num" href="/Admin/Tag/index/p/5.html">5</a>
-                    <a class="next" href="/Admin/Tag/index/p/4.html">下一页</a>
-                    <a class="end" href="/Admin/Tag/index/p/5.html">最后一页</a>
-                    <span class="rows">5 条记录</span>
+<form action="/multi-delete/user.html" method="post">
+        <div class="result_wrap">
+            <!--快捷导航 开始-->
+            <div class="result_content">
+                <div class="short_wrap">
+                    <a href="#"><i class="fa fa-plus"></i>新增用户</a>
                 </div>
             </div>
+            <!--快捷导航 结束-->
         </div>
+
+        <div class="result_wrap">
+            <div class="result_content">
+                <table class="list_tab">
+                    <tr>
+                        <th class="tc" width="5%"><input type="checkbox" name=""></th>
+                        <th class="tc">ID</th>
+                        <th>用户</th>
+                        <th>角色</th>
+                        <th>邮箱</th>
+                        <th>更新时间</th>
+                        <th>操作</th>
+                    </tr>
+
+                    {% for admin in admins %}
+                    <tr>
+                        <td class="tc"><input type="checkbox" name="user_id" value="{{ admin.id }}"></td>
+                        <td class="tc">{{ admin.id }}</td>
+                        <td>{{ admin.username }}</td>
+                        <td>{% for role in admin.roles %}{{ role.name }}{% end %}</td>
+                        <td>{{ admin.email }}</td>
+                        <td>{{ admin.create_date }}</td>
+                        <td>
+                            <i class="fa fa-pencil-square-o" aria-hidden="true" class="btn btn-primary btn-lg"
+                               data-toggle="modal" data-target="#myModal"></i>
+                            <i class="fa fa-key" aria-hidden="true" class="btn btn-primary btn-lg"
+                               data-toggle="modal" data-target="#myModal"></i>
+                            <i class="fa fa-trash" aria-hidden="true" class="btn btn-primary btn-lg"
+                               data-toggle="modal" data-target="#myModal"></i>
+                        </td>
+                    </tr>
+                    {% end %}
+                </table>
+
+    <div class="page_nav">
+        <div>
+            <a class="first" href="/Admin/Tag/index/p/1.html">第一页</a>
+            <a class="prev" href="/Admin/Tag/index/p/2.html">上一页</a>
+            <a class="num" href="/Admin/Tag/index/p/1.html">1</a>
+            <a class="num" href="/Admin/Tag/index/p/2.html">2</a>
+            <span class="current">3</span>
+            <a class="num" href="/Admin/Tag/index/p/4.html">4</a>
+            <a class="num" href="/Admin/Tag/index/p/5.html">5</a>
+            <a class="next" href="/Admin/Tag/index/p/4.html">下一页</a>
+            <a class="end" href="/Admin/Tag/index/p/5.html">最后一页</a>
+            <span class="rows">5 条记录</span>
+        </div>
+    </div>
+    </div>
     </div>
 </form>
 <!--搜索结果页面 列表 结束-->
-<div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
-    <div class="modal-dialog" role="document">
+<div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="mySmallModalLabel">
+    <div class="modal-dialog modal-sm" role="document">
         <div class="modal-content">
             <div class="modal-header">
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
@@ -118,28 +101,35 @@
 </div>
 
 </body>
+
+
 <script>
     var objEdit = document.getElementsByClassName("fa-pencil-square-o");
     for (var i = 0; i < objEdit.length; i++) {
         objEdit[i].onclick = function () {
+            var obj_title = document.getElementById("myModalLabel");
+            obj_title.innerHTML = "修改用户信息";
+
             var objTr = this.parentNode.parentNode;
             var objTds = objTr.getElementsByTagName('td');
-            var userId= objTds[1].innerHTML;
+            var userId = objTds[1].innerHTML;
             var userVal = objTds[2].innerHTML;
             var nameVal = objTds[3].innerHTML;
             var emailVal = objTds[4].innerHTML;
             var objModalBody = document.getElementsByClassName('modal-body')[0];
-            objModalBody.innerHTML = "<label>username:</label><br/><input type='text' name='username' value='" + userVal + "'/><br/>";
-            objModalBody.innerHTML += "<label>role:</label><br/><input type='text' name='role' value='" + nameVal + "'/><br/>";
-            objModalBody.innerHTML += "<label>email:</label><br/><input type='text' name='email' value='" + emailVal + "'/><br/>";
-            var objBtn=document.getElementById('myModal').getElementsByClassName('btn btn-primary')[0];
-            objBtn.onclick= function () {
-                    a({
-                    id:userId,
-                    username:document.getElementsByName('username')[0].value,
-                    role:document.getElementsByName('role')[0].value,
-                    email:document.getElementsByName('email')[0].value
-                },'/ajax/change_user')
+            objModalBody.innerHTML = "<label>用户名:</label><br/><input type='text' style='width:70%' name='username' value='" + userVal + "'/><br/>";
+//            objModalBody.innerHTML += "<label>角色:</label><br/><input type='text' style='width:70%' name='role' value='" + nameVal + "'/><br/>";
+            objModalBody.innerHTML += "<label>角色:</label><br/><select name='role' id=''><option value='admin' selected='selected'>管理员</option><option value='ordinary'>普通用户</option></select><br/>";
+            objModalBody.innerHTML += "<label>邮箱:</label><br/><input type='text' style='width:70%' name='email' value='" + emailVal + "'/><br/>";
+            var objBtn = document.getElementById('myModal').getElementsByClassName('btn btn-primary')[0];
+            console.log(document.getElementsByName('role')[0].value);
+            objBtn.onclick = function () {
+                change_user({
+                    id: userId,
+                    username: document.getElementsByName('username')[0].value,
+                    role: document.getElementsByName('role')[0].value,
+                    email: document.getElementsByName('email')[0].value
+                }, '/ajax/change_user')
             }
         }
     }
@@ -147,21 +137,23 @@
     var objUpdate = document.getElementsByClassName("fa fa-key");
     for (var i = 0; i < objUpdate.length; i++) {
         objUpdate[i].onclick = function () {
+            var obj_title = document.getElementById("myModalLabel");
+            obj_title.innerHTML = "修改密码";
             var objTr = this.parentNode.parentNode;
             var objTds = objTr.getElementsByTagName('td');
-            var userId= objTds[1].innerHTML;
+            var userId = objTds[1].innerHTML;
             var userVal = objTds[2].innerHTML;
             var objModalBody = document.getElementsByClassName('modal-body')[0];
             objModalBody.innerHTML = "<label>username:</label><br/><input type='text' name='id' value='" + userVal + "'><br/>";
-            objModalBody.innerHTML += "<label>newPassword:</label><br/><input name='password' type='text' /><br/>";
-            objModalBody.innerHTML += "<label>rePassword:</label><br/><input name='repassword' type='text' /><br/>";
-            var objBtn=document.getElementById('myModal').getElementsByClassName('btn btn-primary')[0];
-            objBtn.onclick= function () {
-                    a({
-                    id:userId,
-                    password:document.getElementsByName('password')[0].value,
-                    repassword:document.getElementsByName('repassword')[0].value
-                },'/ajax/change_pass')
+            objModalBody.innerHTML += "<label>新密码:</label><br/><input name='password' type='text' /><br/>";
+            objModalBody.innerHTML += "<label>再输一次:</label><br/><input name='repassword' type='text' /><br/>";
+            var objBtn = document.getElementById('myModal').getElementsByClassName('btn btn-primary')[0];
+            objBtn.onclick = function () {
+                change_pass({
+                    id: userId,
+                    password: document.getElementsByName('password')[0].value,
+                    repassword: document.getElementsByName('repassword')[0].value
+                }, '/ajax/change_pass')
             }
         }
     }
@@ -171,14 +163,14 @@
         objDelete[i].onclick = function () {
             var objTr = this.parentNode.parentNode;
             var objTds = objTr.getElementsByTagName('td');
-            var userId= objTds[1].innerHTML;
+            var userId = objTds[1].innerHTML;
             var objModalBody = document.getElementsByClassName('modal-body')[0];
-            var objBtn=document.getElementById('myModal').getElementsByClassName('btn btn-primary')[0];
+            var objBtn = document.getElementById('myModal').getElementsByClassName('btn btn-primary')[0];
             objModalBody.innerHTML = "confirm Delete?";
-            objBtn.onclick= function () {
-                    a({
-                    id:userId
-                },'/ajax/delete_user')
+            objBtn.onclick = function () {
+                delete_user({
+                    id: userId
+                }, '/ajax/delete_user')
             }
         }
     }
@@ -187,9 +179,9 @@
         var r = document.cookie.match("\\b" + name + "=([^;]*)\\b");
         return r ? r[1] : undefined;
     }
-    var a = function (data, url) {
+
+    var change_user = function (data, url) {
         data._xsrf = getCookie("_xsrf");
-        console.log(data._xsrf);
         $.ajax({
             url: url,
             type: 'POST', //GET
@@ -199,14 +191,69 @@
             dataType: 'json',    //返回的数据格式：json/xml/html/script/jsonp/text
 
             success: function (data) {
-                console.log(data.status);
+                var objEdit = document.getElementsByClassName("list_tab")[0].getElementsByTagName('tr');
+                for (var i = 1; i < objEdit.length; i++) {
+                    if (objEdit[i].getElementsByTagName('td')[1].innerText == data.id) {
+                        var str = '<td class="tc"><input type="checkbox" name="id[]" value="59"></td><td class="tc">' + data.id + '</td>' +
+                            '<td>' + data.username + '</td>' + '<td>' + data.role + '</td>' + '<td>' + data.email + '</td>' + '<td>' + data.create_date + '</td>'
+                            + '<td><i class="fa fa-pencil-square-o" aria-hidden="true" class="btn btn-primary btn-lg" data-toggle="modal" data-target="#myModal"></i>' +
+                            '<i class="fa fa-key" aria-hidden="true" class="btn btn-primary btn-lg" data-toggle="modal" data-target="#myModal"></i>' +
+                            '<i class="fa fa-trash" aria-hidden="true" class="btn btn-primary btn-lg" data-toggle="modal" data-target="#myModal"></i></td>';
+                        objEdit[i].innerHTML = str;
+                    }
+                }
             },
             error: function (xhr, textStatus) {
                 console.log(xhr);
                 console.log(textStatus);
             }
         });
+    };
 
-    }
+    var change_pass = function (data, url) {
+        data._xsrf = getCookie("_xsrf");
+        $.ajax({
+            url: url,
+            type: 'POST', //GET
+            async: true,    //或false,是否异步
+            data: data,
+            timeout: 5000,    //超时时间
+            dataType: 'json',    //返回的数据格式：json/xml/html/script/jsonp/text
+
+            success: function (data) {
+                console.log(data.status)
+            },
+            error: function (xhr, textStatus) {
+                console.log(xhr);
+                console.log(textStatus);
+            }
+        });
+    };
+
+    var delete_user = function (data, url) {
+        data._xsrf = getCookie("_xsrf");
+        $.ajax({
+            url: url,
+            type: 'POST', //GET
+            async: true,    //或false,是否异步
+            data: data,
+            timeout: 5000,    //超时时间
+            dataType: 'json',    //返回的数据格式：json/xml/html/script/jsonp/text
+
+            success: function (data) {
+                var objEdit = document.getElementsByClassName("list_tab")[0].getElementsByTagName('tr');
+                for (var i = 1; i < objEdit.length; i++) {
+                    if (objEdit[i].getElementsByTagName('td')[1].innerText == data.id) {
+                        objEdit[i].innerHTML = '';
+                    }
+                }
+            },
+            error: function (xhr, textStatus) {
+                console.log(xhr);
+                console.log(textStatus);
+            }
+        });
+    };
+
 </script>
 </html>

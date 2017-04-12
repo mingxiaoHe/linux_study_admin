@@ -16,7 +16,7 @@ import json
 
 from tornado.options import define, options
 from modules.sqlhelper import SqlHelper
-from modules.common import get_md5_string, turn_to_int
+from modules.common import get_md5_string, turn_to_int, turn_userinfo_to_dict
 from modules import ui_methods
 from modules.PageHelper import Pager, PageInfo
 
@@ -30,8 +30,8 @@ DOMAIN = 'http://127.0.0.1:8000'
 
 class BaseHandler(tornado.web.RequestHandler):
     def __init__(self, application, request, **kwargs):
-        super(BaseHandler, self).__init__(application, request, **kwargs)
-        self.sess = SqlHelper()
+        super().__init__(application, request, **kwargs)
+        self.session = SqlHelper()
 
     def get_current_user(self):
         return self.get_secure_cookie('user_name')
@@ -50,11 +50,13 @@ class UrlHandler(BaseHandler):
     def get(self, type):
         if type == 'admin':
             self.render('user/admin.html',
-                        admins=self.sess.get_admins_info().users,
-                        ordinaries = self.sess.get_ordinary_info().users,
+                        admins=self.session.get_admins_info().users,
                         )
         if type == 'ordinary':
-            self.render('user/ordinary.html')
+            print()
+            self.render('user/ordinary.html',
+                        ordinaries=self.session.get_ordinary_info().users,
+                        )
 
 class ArticleHandler(BaseHandler):
     @tornado.web.asynchronous
@@ -62,12 +64,12 @@ class ArticleHandler(BaseHandler):
         if type == 'info':
             page = turn_to_int(page, 1)
             # 此分类下的所有文章
-            all_articles = self.sess.get_all_article()
+            all_articles = self.session.get_all_article()
 
             # uri的dirname
             dir_uri_name = os.path.dirname(self.request.uri)
 
-            count = self.sess.get_articles_count()
+            count = self.session.get_articles_count()
 
             # 检测页数是否合法，如果页数超过
             page_obj = PageInfo(page, count, per_item=5)
@@ -85,7 +87,7 @@ class ArticleHandler(BaseHandler):
                         )
         elif type == 'add':
             self.render('article/add.html',
-                        categories = self.sess.get_all_category(),
+                        categories = self.session.get_all_category(),
                         )
         elif type == 'next':
             self.render('article/next.html')
@@ -97,7 +99,7 @@ class ArticleHandler(BaseHandler):
             description = self.get_argument('description')
             tag = self.get_argument('tag').split()
             category = self.get_argument('category')
-            status = self.sess.add_article(title, description, category, tag, content, super().get_current_user())
+            status = self.session.add_article(title, description, category, tag, content, super().get_current_user())
             if status:
                 self.redirect('/article/next.html')
             else:
@@ -106,8 +108,8 @@ class ArticleHandler(BaseHandler):
 class ArticleEditHandler(BaseHandler):
     def get(self, id):
         self.render('article/add.html',
-                    article_info=self.sess.get_article_byid(id),
-                    categories=self.sess.get_all_category(),
+                    article_info=self.session.get_article_byid(id),
+                    categories=self.session.get_all_category(),
                     )
     def post(self, id):
         title = self.get_argument('title')
@@ -115,7 +117,7 @@ class ArticleEditHandler(BaseHandler):
         description = self.get_argument('description')
         tag = self.get_argument('tag').split()
         category = self.get_argument('category')
-        status = self.sess.update_article(id, title, description, category, tag, content)
+        status = self.session.update_article(id, title, description, category, tag, content)
         if status:
             self.redirect('/article/next.html')
         else:
@@ -128,13 +130,13 @@ class CategoryHandler(BaseHandler):
         if type == 'info':
             page = turn_to_int(page, 1)
             # 此分类下的所有文章
-            all_category = self.sess.category()
+            all_category = self.session.category()
             print(all_category[0].name)
 
             # uri的dirname
             dir_uri_name = os.path.dirname(self.request.uri)
 
-            count = self.sess.get_category_count()
+            count = self.session.get_category_count()
 
             # 检测页数是否合法，如果页数超过
             page_obj = PageInfo(page, count, per_item=5)
@@ -149,23 +151,24 @@ class CategoryHandler(BaseHandler):
             self.render('category/info.html',
                         categories=all_category[page_obj.start:page_obj.end],
                         page_string=page_string,
+                        category = self.session.get_category_info_by_basename(type),
                         )
         else:
             page = turn_to_int(page, 1)
             # 此分类下的所有文章
-            cate_articles = self.sess.get_category_articles_by_basename(type).articles
+            cate_articles = self.session.get_category_articles_by_basename(type).articles
 
             # uri的dirname
             dir_uri_name = os.path.dirname(self.request.uri)
 
             # 此分类信息的信息
-            category = self.sess.get_category_info_by_basename(type)
+            category = self.session.get_category_info_by_basename(type)
 
             # 根据此分类的id查找文章并计算count
-            count = self.sess.get_category_articles_count(category.id)
+            count = self.session.get_category_articles_count(category.id)
 
             # 检测页数是否合法，如果页数超过
-            page_obj = PageInfo(page, count, per_item=1)
+            page_obj = PageInfo(page, count, per_item=5)
             all_page_count = page_obj.all_page_count
             if page > all_page_count:
                 page = all_page_count
@@ -177,6 +180,7 @@ class CategoryHandler(BaseHandler):
             self.render('category/cate.html',
                         cate_articles=cate_articles[page_obj.start:page_obj.end],
                         page_string=page_string,
+                        category=self.session.get_category_info_by_basename(type),
                         )
 
 
@@ -186,12 +190,12 @@ class TagHandler(BaseHandler):
         if type == 'info':
             page = turn_to_int(page, 1)
             # 此分类下的所有文章
-            all_tag = self.sess.get_tag_list()
+            all_tag = self.session.get_tag_list()
 
             # uri的dirname
             dir_uri_name = os.path.dirname(self.request.uri)
 
-            count = self.sess.get_category_count()
+            count = self.session.get_tag_count()
 
             # 检测页数是否合法，如果页数超过
             page_obj = PageInfo(page, count, per_item=5)
@@ -208,19 +212,18 @@ class TagHandler(BaseHandler):
                         page_string=page_string,
                         )
         else:
-            print(type, page)
             page = turn_to_int(page, 1)
             # 此分类下的所有文章
-            tag_articles = self.sess.get_tag_articles_by_tagname(type).articles
+            tag_articles = self.session.get_tag_articles_by_tagname(type).articles
 
             # uri的dirname
             dir_uri_name = os.path.dirname(self.request.uri)
 
             # 此分类信息的信息
-            tag = self.sess.get_tag_info_by_tagname(type)
+            tag = self.session.get_tag_info_by_tagname(type)
 
             # 根据此分类的id查找文章并计算count
-            count = self.sess.get_tag_articles_count(tag.id)
+            count = self.session.get_tag_articles_count(tag.id)
 
             # 检测页数是否合法，如果页数超过
             page_obj = PageInfo(page, count, per_item=1)
@@ -244,12 +247,12 @@ class LinksHandler(BaseHandler):
 
             page = turn_to_int(page, 1)
             # 此分类下的所有文章
-            all_links = self.sess.get_all_links()
+            all_links = self.session.get_all_links()
 
             # uri的dirname
             dir_uri_name = os.path.dirname(self.request.uri)
 
-            count = self.sess.get_links_count()
+            count = self.session.get_links_count()
 
             # 检测页数是否合法，如果页数超过
             page_obj = PageInfo(page, count, per_item=3)
@@ -273,7 +276,7 @@ class DescriptionHandler(BaseHandler):
     def get(self, type):
         if type == 'info':
             self.render('desc/info.html',
-                        descs=self.sess.get_description(),
+                        descs=self.session.get_description(),
                         )
 
 class LoginHandler(BaseHandler):
@@ -289,7 +292,7 @@ class LoginHandler(BaseHandler):
         username = self.get_argument('username')
         password = self.get_argument('password')
 
-        user_obj = self.sess.get_user_info(username)
+        user_obj = self.session.get_user_info(username)
 
         if username == user_obj.username and get_md5_string(password) == user_obj.password:
             self.set_secure_cookie('user_name', self.get_argument('username'), expires_days=None)
@@ -302,6 +305,56 @@ class LogoutHandler(BaseHandler):
     def get(self):
         self.clear_cookie('username')
         self.redirect('/login')
+
+class MultiDeleteHandler(BaseHandler):
+    @tornado.web.asynchronous
+    def post(self, types):
+        if hasattr(self, types):
+            func = getattr(self, types)
+            func()
+
+    def user(self):
+        id_list = self.get_arguments('user_id')
+        status = self.session.delete_users(id_list)
+        if status:
+            self.render('user/admin.html',
+                        admins=self.session.get_admins_info().users,
+                        )
+
+    def category(self):
+        category_id_list = self.get_arguments('category_id')
+        status = self.session.delete_categories(category_id_list)
+        if status:
+            self.redirect('/category/info/1.html')
+
+
+    def cate_article(self):
+        articles_id_list = self.get_arguments('article_id')
+        basename = self.session.get_article_byid(articles_id_list[0]).category.basename
+        status = self.session.delete_articles(articles_id_list)
+        if status:
+            self.redirect('/category/%s/1.html' % basename)
+
+    def article(self):
+        articles_id_list = self.get_arguments('article_id')
+        status = self.session.delete_articles(articles_id_list)
+        if status:
+            self.redirect('/article/info/1.html')
+
+    def tag_article(self):
+        articles_id_list = self.get_arguments('article_id')
+        tagname = self.get_argument('tagname')
+        status = self.session.delete_articles(articles_id_list)
+        if status:
+            self.redirect('/tag/%s/1.html' % tagname)
+
+    def tag(self):
+        tag_id_list = self.get_arguments('tag_id')
+        status = self.session.delete_tags(tag_id_list)
+        if status:
+            self.redirect('/tag/info/1.html')
+
+
 
 class AjaxHandler(BaseHandler):
     def set_default_headers(self):
@@ -319,9 +372,11 @@ class AjaxHandler(BaseHandler):
                 username = self.get_argument('username')
                 role = self.get_argument('role')
                 email = self.get_argument('email')
-                result = self.sess.set_user_info(id, username, role, email)
+                result = self.session.set_user_info(id, username, role, email)
+                user_info = SqlHelper().get_user_info_byid(id)
+                user = turn_userinfo_to_dict(user_info)
                 if result:
-                    self.write(tornado.escape.json_encode(status_success))
+                    self.write(tornado.escape.json_encode(user))
                     self.finish()
                 else:
                     self.write(tornado.escape.json_encode(status_fail))
@@ -331,7 +386,7 @@ class AjaxHandler(BaseHandler):
             password = self.get_argument('password')
             repassword = self.get_argument('repassword')
             if password == repassword:
-                status = self.sess.change_user_passwd_byid(id, get_md5_string(password))
+                status = self.session.change_user_passwd_byid(id, get_md5_string(password))
                 if status:
                     self.write(tornado.escape.json_encode(status_success))
                     self.finish()
@@ -340,21 +395,21 @@ class AjaxHandler(BaseHandler):
                     self.finish()
         elif type == 'delete_user':
             id = self.get_argument('id')
-            status = self.sess.delete_user_byid(id)
+            status = self.session.delete_user_byid(id)
             if status:
-                self.write(tornado.escape.json_encode(status_success))
+                self.write(tornado.escape.json_encode({"id": id}))
                 self.finish()
             else:
                 self.write(tornado.escape.json_encode(status_fail))
                 self.finish()
     def get(self, type):
         if type == 'get_category':
-            category_list = self.sess.category()
+            category_list = self.session.category()
             ret = [{"name": category_obj.name, "basename": category_obj.basename} for category_obj in category_list]
             self.write(tornado.escape.json_encode(ret))
             self.finish()
         if type == 'get_tag':
-            tag_list = self.sess.get_tag_list()
+            tag_list = self.session.get_tag_list()
             ret = [ tag.name for tag in tag_list]
             self.write(tornado.escape.json_encode(ret))
             self.finish()
@@ -654,6 +709,7 @@ if __name__ == '__main__':
             (r'/ajax/(?P<type>\w+)', AjaxHandler),
             (r'/links/(?P<type>\w+)/?(?P<page>\d+)?.html', LinksHandler),
             (r'/desc/(?P<type>\w+).html', DescriptionHandler),
+            (r'/multi-delete/(?P<types>\w+).html', MultiDeleteHandler),
 
             # ueditor
             (r'/upload', UploadHandler),

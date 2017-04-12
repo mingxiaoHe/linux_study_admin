@@ -30,13 +30,14 @@
 <!--结果页快捷搜索框 结束-->
 
 <!--搜索结果页面 列表 开始-->
-<form action="#" method="post">
+<form action="/multi-delete/tag_article.html" method="post">
+    <input type="hidden" name="tagname" value="{{ tag.name }}">
     <div class="result_wrap">
         <!--快捷导航 开始-->
         <div class="result_content">
             <div class="short_wrap">
                 <a href="/article/add.html"><i class="fa fa-plus"></i>新增文章</a>
-                <a href="#"><i class="fa fa-recycle"></i>批量删除</a>
+                <input class="fa fa-recycle" type="submit" value="批量删除">
             </div>
         </div>
         <!--快捷导航 结束-->
@@ -56,7 +57,7 @@
                 </tr>
                 {% for article in tag_articles %}
                 <tr>
-                    <td class="tc"><input type="checkbox" name="id[]" value="59"></td>
+                    <td class="tc"><input type="checkbox" name="article_id" value="{{ article.id }}"></td>
 
                     <td class="tc">{{ article.id }}</td>
                     <td><a target="_blank" href="http://127.0.0.1:8000/post/{{ article.id }}.html">{{ article.title }}</a></td>

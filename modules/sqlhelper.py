@@ -1,7 +1,7 @@
 #!
 
 from sqlalchemy.orm import sessionmaker
-from sqlalchemy import func
+from sqlalchemy import func, and_, or_
 from sqlalchemy import create_engine
 from sqlalchemy.exc import IntegrityError
 from conf.settings import SQLALCHEMY_DATABASE_URI
@@ -23,8 +23,15 @@ class SqlHelper(object):
         return self.session.query(Category).all()
         # return self.session.query(Category.name).all()
 
+    def get_category_info_byid(self, id):
+        return self.session.query(Category).filter(Category.id==id).first()
+
+
     def get_category_count(self):
         return self.session.query(Category).count()
+
+    def get_tag_count(self):
+        return self.session.query(Tag).count()
 
     def get_description(self):
         return self.session.query(Description.content).order_by(Description.pub_date.asc()).all()
@@ -272,11 +279,61 @@ class SqlHelper(object):
     def get_tag_list(self):
         return self.session.query(Tag).all()
 
-    def __del__(self):
-        self.session.close()
+
+    def delete_users(self, users_id):
+        try:
+            # 删除用户会删除用户收藏文章，角色信息，但不会删除用户文章，文章作者显示未知
+            for user in self.session.query(User).filter(User.id.in_(users_id)).all():
+                # user.collections = []
+                # self.session.commit()
+
+                # 当前用户收藏的文章
+                # collected_articles = self.session.query(User).filter(User.id==user.id).scalar().collections
+                # print(collected_articles)
+                user.collections.clear()
+                self.session.delete(user)
+                self.session.commit()
+
+                return True
+        except Exception as e:
+            return False
+
+    def delete_tags(self, tags_list):
+        # 删除标签，不删除标签下的文章
+        try:
+            for tag in self.session.query(Tag).filter(Tag.id.in_(tags_list)).all():
+                tag.articles.clear()
+                self.session.delete(tag)
+                self.session.commit()
+            return True
+        except Exception as e:
+            return False
+
+
+    def delete_categories(self, category_list):
+        # 删除分类名，不删除分类下的文章
+        try:
+            for category in self.session.query(Category).filter(Category.id.in_(category_list)).all():
+                category.articles.clear()
+                self.session.delete(category)
+                self.session.commit()
+            return True
+        except Exception as e:
+            return False
+
+    def delete_articles(self, article_list):
+        # 删除文章
+        try:
+            for article in self.session.query(Article).filter(Article.id.in_(article_list)).all():
+                self.session.delete(article)
+                self.session.commit()
+            return True
+        except Exception as e:
+            return False
+
 
 
 if __name__ == '__main__':
     obj = SqlHelper()
-    ret = obj.get_tag_articles_by_tagname(11)
-    print(ret.articles)
+    ret = obj.get_user_info_byid(1)
+    print(ret.roles[0])

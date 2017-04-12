@@ -30,13 +30,13 @@
 <!--结果页快捷搜索框 结束-->
 
 <!--搜索结果页面 列表 开始-->
-<form action="#" method="post">
+<form action="/multi-delete/tag.html" method="post">
     <div class="result_wrap">
         <!--快捷导航 开始-->
         <div class="result_content">
             <div class="short_wrap">
                 <a href="#"><i class="fa fa-plus"></i>新增用户</a>
-                <a href="#"><i class="fa fa-recycle"></i>批量删除</a>
+                <input class="fa fa-recycle" type="submit" value="批量删除">
             </div>
         </div>
         <!--快捷导航 结束-->
@@ -55,8 +55,7 @@
                 </tr>
                 {% for tag in tags %}
                 <tr>
-                    <td class="tc"><input type="checkbox" name="id[]" value="59"></td>
-
+                    <td class="tc"><input type="checkbox" name="tag_id" value="{{ tag.id }}"></td>
                     <td class="tc">{{ tag.id }}</td>
                     <td>{{ tag.name }}</td>
                     <td>{{ tag.pub_date }}</td>
