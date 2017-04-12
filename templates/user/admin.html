@@ -65,16 +65,9 @@
 
     <div class="page_nav">
         <div>
-            <a class="first" href="/Admin/Tag/index/p/1.html">第一页</a>
-            <a class="prev" href="/Admin/Tag/index/p/2.html">上一页</a>
-            <a class="num" href="/Admin/Tag/index/p/1.html">1</a>
-            <a class="num" href="/Admin/Tag/index/p/2.html">2</a>
-            <span class="current">3</span>
-            <a class="num" href="/Admin/Tag/index/p/4.html">4</a>
-            <a class="num" href="/Admin/Tag/index/p/5.html">5</a>
-            <a class="next" href="/Admin/Tag/index/p/4.html">下一页</a>
-            <a class="end" href="/Admin/Tag/index/p/5.html">最后一页</a>
-            <span class="rows">5 条记录</span>
+            {% for line in page_string %}
+                {% raw line%}
+            {% end %}
         </div>
     </div>
     </div>

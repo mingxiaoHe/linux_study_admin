@@ -186,6 +186,19 @@ class SqlHelper(object):
     def get_all_article(self):
         return self.session.query(Article).all()
 
+    def get_all_admins(self):
+        return self.session.query(Role).filter(Role.name=='admin').scalar()
+
+    def get_all_admins_count(self):
+        return len(self.session.query(Role).filter(Role.name=='admin').scalar().users)
+
+    def get_all_ordinaries(self):
+        return self.session.query(Role).filter(Role.name=='ordinary').scalar()
+
+    def get_all_ordinaries_count(self):
+        return len(self.session.query(Role).filter(Role.name=='ordinary').scalar().users)
+
+
     def get_all_category(self):
         return self.session.query(Category).all()
 
@@ -335,5 +348,5 @@ class SqlHelper(object):
 
 if __name__ == '__main__':
     obj = SqlHelper()
-    ret = obj.get_user_info_byid(1)
-    print(ret.roles[0])
+    ret = obj.get_all_admins()
+    print(ret)

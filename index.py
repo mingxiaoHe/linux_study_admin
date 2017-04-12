@@ -47,16 +47,60 @@ class IndexHandler(BaseHandler):
 class UrlHandler(BaseHandler):
     @tornado.web.authenticated
     @tornado.web.asynchronous
-    def get(self, type):
-        if type == 'admin':
-            self.render('user/admin.html',
-                        admins=self.session.get_admins_info().users,
-                        )
-        if type == 'ordinary':
-            print()
-            self.render('user/ordinary.html',
-                        ordinaries=self.session.get_ordinary_info().users,
-                        )
+    def get(self, types, page):
+        if hasattr(self, types):
+            func = getattr(self, types)
+            func(page)
+
+    def admin(self, page):
+        page = turn_to_int(page, 1)
+        # 此分类下的所有文章
+        all_admins = self.session.get_all_admins().users
+
+        # uri的dirname
+        dir_uri_name = os.path.dirname(self.request.uri)
+
+        count = self.session.get_all_admins_count()
+
+        # 检测页数是否合法，如果页数超过
+        page_obj = PageInfo(page, count, per_item=5)
+        all_page_count = page_obj.all_page_count
+        if page > all_page_count:
+            page = all_page_count
+        elif page <= 0:
+            page = 1
+
+        page_string = Pager(page, all_page_count, dir_uri_name)
+
+        self.render('user/admin.html',
+                    admins=all_admins[page_obj.start:page_obj.end],
+                    page_string=page_string,
+                    )
+    def ordinary(self, page):
+
+        page = turn_to_int(page, 1)
+        # 此分类下的所有文章
+        all_ordinaries = self.session.get_all_ordinaries().users
+
+        # uri的dirname
+        dir_uri_name = os.path.dirname(self.request.uri)
+
+        count = self.session.get_all_ordinaries_count()
+
+        # 检测页数是否合法，如果页数超过
+        page_obj = PageInfo(page, count, per_item=5)
+        all_page_count = page_obj.all_page_count
+        if page > all_page_count:
+            page = all_page_count
+        elif page <= 0:
+            page = 1
+
+        page_string = Pager(page, all_page_count, dir_uri_name)
+
+        self.render('user/ordinary.html',
+                    ordinaries=all_ordinaries[page_obj.start:page_obj.end],
+                    page_string=page_string,
+                    )
 
 class ArticleHandler(BaseHandler):
     @tornado.web.asynchronous
@@ -701,7 +745,7 @@ if __name__ == '__main__':
             (r'/login', LoginHandler),
             (r'/logout', LogoutHandler),
             # (r'/user/admin', IndexHandler),
-            (r'/user/(?P<type>\w+).html', UrlHandler),
+            (r'/user/(?P<types>\w+)/(?P<page>\d+).html', UrlHandler),
             (r'/article/edit/(?P<id>\d+).html', ArticleEditHandler),
             (r'/article/(?P<type>\w+)/?(?P<page>\d+)?.html', ArticleHandler),
             (r'/category/(?P<type>\w+)/?(?P<page>\d+)?.html', CategoryHandler),
