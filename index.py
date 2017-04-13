@@ -469,6 +469,28 @@ class AjaxHandler(BaseHandler):
             self.finish()
 
 
+    def delete_category(self):
+        """删除一个分类"""
+        category_id_list = self.get_arguments('id')
+        status = self.session.delete_categories(category_id_list)
+        if status:
+            self.write(tornado.escape.json_encode({"id": category_id_list[0]}))
+            self.finish()
+        else:
+            self.write(tornado.escape.json_encode(STATUS_FAIL))
+            self.finish()
+
+    def delete_article(self):
+        article_id_list = self.get_arguments('id')
+        status = self.session.delete_articles(article_id_list)
+        if status:
+            self.write(tornado.escape.json_encode({"id": article_id_list[0]}))
+            self.finish()
+        else:
+            self.write(tornado.escape.json_encode(STATUS_FAIL))
+            self.finish()
+
+
     def change_category(self):
         id = self.get_argument('id')
         category_name = self.get_argument('categoryName')

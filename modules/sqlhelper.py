@@ -330,6 +330,7 @@ class SqlHelper(object):
         except Exception as e:
             return False
 
+
     def delete_articles(self, article_list):
         # 删除文章
         try:

@@ -5,6 +5,9 @@
     <link rel="stylesheet" href="/static/style/css/ch-ui.admin.css">
     <link rel="stylesheet" href="/static/style/font/css/font-awesome.min.css">
     <script type="text/javascript" src="/static/style/js/jquery.js"></script>
+    <link rel="stylesheet" href="/static/style/css/bootstrap-theme.min.css">
+    <link rel="stylesheet" href="/static/style/css/bootstrap.min.css">
+    <script type="text/javascript" src="/static/style/js/bootstrap.min.js"></script>
     <script type="text/javascript" src="/static/style/js/ch-ui.admin.js"></script>
 </head>
 <body>
@@ -65,7 +68,8 @@
                     <td>{{ article.last_modify_date }}</td>
                     <td>
                         <a href="/article/edit/{{ article.id }}.html"><i class="fa fa-pencil-square-o" aria-hidden="true"></i></a>
-                        <a href=""><i class="fa fa-trash" aria-hidden="true"></i></a>
+                        <i class="fa fa-trash" aria-hidden="true" class="btn btn-primary btn-lg"
+                               data-toggle="modal" data-target="#myModal"></i>
                     </td>
                 </tr>
                 {% end %}
@@ -83,6 +87,73 @@
 </form>
 <!--搜索结果页面 列表 结束-->
 
+<div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="mySmallModalLabel">
+    <div class="modal-dialog modal-sm" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
+                        aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title" id="myModalLabel">Modal title</h4>
+            </div>
+            <div class="modal-body">
+                ...
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary" data-dismiss="modal">Save changes</button>
+            </div>
+        </div>
+    </div>
+</div>
 
 </body>
+
+<script>
+
+    var objDelete = document.getElementsByClassName("fa fa-trash");
+    for (var i = 0; i < objDelete.length; i++) {
+        objDelete[i].onclick = function () {
+            var obj_title = document.getElementById("myModalLabel");
+            obj_title.innerHTML = "删除文章";
+            var objTr = this.parentNode.parentNode;
+            var objTds = objTr.getElementsByTagName('td');
+            var articleId = objTds[1].innerHTML;
+            var objModalBody = document.getElementsByClassName('modal-body')[0];
+            var objBtn = document.getElementById('myModal').getElementsByClassName('btn btn-primary')[0];
+            objModalBody.innerHTML = "确定删除？";
+            objBtn.onclick = function () {
+                delete_article({
+                    id: articleId
+                }, '/ajax/delete_article')
+            }
+        }
+    }
+
+        var delete_article = function (data, url) {
+        data._xsrf = getCookie("_xsrf");
+        $.ajax({
+            url: url,
+            type: 'POST', //GET
+            async: true,    //或false,是否异步
+            data: data,
+            timeout: 5000,    //超时时间
+            dataType: 'json',    //返回的数据格式：json/xml/html/script/jsonp/text
+
+            success: function (data) {
+                var objEdit = document.getElementsByClassName("list_tab")[0].getElementsByTagName('tr');
+                for (var i = 1; i < objEdit.length; i++) {
+                    if (objEdit[i].getElementsByTagName('td')[1].innerText == data.id) {
+                        objEdit[i].parentNode.removeChild(objEdit[i]);
+                        break;
+                    }
+                }
+            },
+            error: function (xhr, textStatus) {
+                console.log(xhr);
+                console.log(textStatus);
+            }
+        });
+    };
+</script>
+
 </html>

@@ -241,7 +241,8 @@
                 var objEdit = document.getElementsByClassName("list_tab")[0].getElementsByTagName('tr');
                 for (var i = 1; i < objEdit.length; i++) {
                     if (objEdit[i].getElementsByTagName('td')[1].innerText == data.id) {
-                        objEdit[i].innerHTML = '';
+                        objEdit[i].parentNode.removeChild(objEdit[i]);
+                        break;
                     }
                 }
             },

@@ -110,7 +110,6 @@
 <script>
     var objEdit = document.getElementsByClassName("fa-pencil-square-o");
     for (var i = 0; i < objEdit.length; i++) {
-                    console.log(objEdit[i]);
         objEdit[i].onclick = function () {
 
             var obj_title = document.getElementById("myModalLabel");
@@ -119,7 +118,6 @@
             var objTr = this.parentNode.parentNode;
             var objTds = objTr.getElementsByTagName('td');
             var categoryId = objTds[1].innerHTML;
-            console.log(categoryId);
             var categoryName = objTds[2].innerHTML;
             var categoryBasename = objTds[3].innerHTML;
             var objModalBody = document.getElementsByClassName('modal-body')[0];
@@ -163,6 +161,52 @@
             }
         });
     };
+
+    var objDelete = document.getElementsByClassName("fa fa-trash");
+    for (var i = 0; i < objDelete.length; i++) {
+        objDelete[i].onclick = function () {
+            var obj_title = document.getElementById("myModalLabel");
+            obj_title.innerHTML = "删除分类";
+            var objTr = this.parentNode.parentNode;
+            var objTds = objTr.getElementsByTagName('td');
+            var categoryId = objTds[1].innerHTML;
+            var objModalBody = document.getElementsByClassName('modal-body')[0];
+            var objBtn = document.getElementById('myModal').getElementsByClassName('btn btn-primary')[0];
+            objModalBody.innerHTML = "确定删除？";
+            objBtn.onclick = function () {
+                delete_category({
+                    id: categoryId
+                }, '/ajax/delete_category')
+            }
+        }
+    }
+
+        var delete_category = function (data, url) {
+        data._xsrf = getCookie("_xsrf");
+        $.ajax({
+            url: url,
+            type: 'POST', //GET
+            async: true,    //或false,是否异步
+            data: data,
+            timeout: 5000,    //超时时间
+            dataType: 'json',    //返回的数据格式：json/xml/html/script/jsonp/text
+
+            success: function (data) {
+                var objEdit = document.getElementsByClassName("list_tab")[0].getElementsByTagName('tr');
+                for (var i = 1; i < objEdit.length; i++) {
+                    if (objEdit[i].getElementsByTagName('td')[1].innerText == data.id) {
+                        objEdit[i].parentNode.removeChild(objEdit[i]);
+                        break;
+                    }
+                }
+            },
+            error: function (xhr, textStatus) {
+                console.log(xhr);
+                console.log(textStatus);
+            }
+        });
+    };
+
 
 
 </script>
