@@ -5,6 +5,9 @@
     <link rel="stylesheet" href="/static/style/css/ch-ui.admin.css">
     <link rel="stylesheet" href="/static/style/font/css/font-awesome.min.css">
     <script type="text/javascript" src="/static/style/js/jquery.js"></script>
+    <link rel="stylesheet" href="/static/style/css/bootstrap-theme.min.css">
+    <link rel="stylesheet" href="/static/style/css/bootstrap.min.css">
+    <script type="text/javascript" src="/static/style/js/bootstrap.min.js"></script>
     <script type="text/javascript" src="/static/style/js/ch-ui.admin.js"></script>
 </head>
 <body>
@@ -62,8 +65,10 @@
                     <td>{{ category.basename }}</td>
                     <td>{{ category.pub_date }}</td>
                     <td>
-                        <i class="fa fa-pencil-square-o" aria-hidden="true"></i>
-                        <i class="fa fa-trash" aria-hidden="true"></i>
+                            <i class="fa fa-pencil-square-o" aria-hidden="true" class="btn btn-primary btn-lg"
+                               data-toggle="modal" data-target="#myModal"></i>
+                            <i class="fa fa-trash" aria-hidden="true" class="btn btn-primary btn-lg"
+                               data-toggle="modal" data-target="#myModal"></i>
                     </td>
                 </tr>
                 {% end %}
@@ -81,5 +86,85 @@
     </div>
 </form>
 <!--搜索结果页面 列表 结束-->
+
+<div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="mySmallModalLabel">
+    <div class="modal-dialog modal-sm" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
+                        aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title" id="myModalLabel">Modal title</h4>
+            </div>
+            <div class="modal-body">
+                ...
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary" data-dismiss="modal">Save changes</button>
+            </div>
+        </div>
+    </div>
+</div>
 </body>
+
+<script>
+    var objEdit = document.getElementsByClassName("fa-pencil-square-o");
+    for (var i = 0; i < objEdit.length; i++) {
+                    console.log(objEdit[i]);
+        objEdit[i].onclick = function () {
+
+            var obj_title = document.getElementById("myModalLabel");
+            obj_title.innerHTML = "修改分类信息";
+
+            var objTr = this.parentNode.parentNode;
+            var objTds = objTr.getElementsByTagName('td');
+            var categoryId = objTds[1].innerHTML;
+            console.log(categoryId);
+            var categoryName = objTds[2].innerHTML;
+            var categoryBasename = objTds[3].innerHTML;
+            var objModalBody = document.getElementsByClassName('modal-body')[0];
+            objModalBody.innerHTML = "<label>分类名:</label><br/><input type='text' style='width:70%' name='categoryName' value='" + categoryName + "'/><br/>";
+            objModalBody.innerHTML += "<label>basename:</label><br/><input type='text' style='width:70%' name='categoryBasename' value='" + categoryBasename + "'/><br/>";
+            var objBtn = document.getElementById('myModal').getElementsByClassName('btn btn-primary')[0];
+            objBtn.onclick = function () {
+                change_category({
+                    id: categoryId,
+                    categoryName: document.getElementsByName('categoryName')[0].value,
+                    categoryBasename: document.getElementsByName('categoryBasename')[0].value,
+                }, '/ajax/change_category')
+            }
+        }
+    }
+        var change_category = function (data, url) {
+        data._xsrf = getCookie("_xsrf");
+        $.ajax({
+            url: url,
+            type: 'POST', //GET
+            async: true,    //或false,是否异步
+            data: data,
+            timeout: 5000,    //超时时间
+            dataType: 'json',    //返回的数据格式：json/xml/html/script/jsonp/text
+
+            success: function (data) {
+                var objEdit = document.getElementsByClassName("list_tab")[0].getElementsByTagName('tr');
+                for (var i = 1; i < objEdit.length; i++) {
+                    if (objEdit[i].getElementsByTagName('td')[1].innerText == data.id) {
+                        var str = '<td class="tc"><input type="checkbox" name="id[]" value="59"></td><td class="tc">' + data.id + '</td>' +
+                            '<td>' + name + '</td>' + '<td>' + data.basename + '</td>' + '<td>' + data.pub_date + '</td>'
+                            + '<td><i class="fa fa-pencil-square-o" aria-hidden="true" class="btn btn-primary btn-lg" data-toggle="modal" data-target="#myModal"></i>' +
+                            '<i class="fa fa-trash" aria-hidden="true" class="btn btn-primary btn-lg" data-toggle="modal" data-target="#myModal"></i></td>';
+                        objEdit[i].innerHTML = str;
+                    }
+                }
+            },
+            error: function (xhr, textStatus) {
+                console.log(xhr);
+                console.log(textStatus);
+            }
+        });
+    };
+
+
+</script>
+
 </html>

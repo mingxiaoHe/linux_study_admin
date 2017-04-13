@@ -153,13 +153,15 @@
 
     var objDelete = document.getElementsByClassName("fa fa-trash");
     for (var i = 0; i < objDelete.length; i++) {
+        var obj_title = document.getElementById("myModalLabel");
+        obj_title.innerHTML = "删除用户";
         objDelete[i].onclick = function () {
             var objTr = this.parentNode.parentNode;
             var objTds = objTr.getElementsByTagName('td');
             var userId = objTds[1].innerHTML;
             var objModalBody = document.getElementsByClassName('modal-body')[0];
             var objBtn = document.getElementById('myModal').getElementsByClassName('btn btn-primary')[0];
-            objModalBody.innerHTML = "confirm Delete?";
+            objModalBody.innerHTML = "确定删除?";
             objBtn.onclick = function () {
                 delete_user({
                     id: userId

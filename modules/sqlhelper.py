@@ -24,8 +24,7 @@ class SqlHelper(object):
         # return self.session.query(Category.name).all()
 
     def get_category_info_byid(self, id):
-        return self.session.query(Category).filter(Category.id==id).first()
-
+        return self.session.query(Category).filter(Category.id == id).first()
 
     def get_category_count(self):
         return self.session.query(Category).count()
@@ -187,17 +186,16 @@ class SqlHelper(object):
         return self.session.query(Article).all()
 
     def get_all_admins(self):
-        return self.session.query(Role).filter(Role.name=='admin').scalar()
+        return self.session.query(Role).filter(Role.name == 'admin').scalar()
 
     def get_all_admins_count(self):
-        return len(self.session.query(Role).filter(Role.name=='admin').scalar().users)
+        return len(self.session.query(Role).filter(Role.name == 'admin').scalar().users)
 
     def get_all_ordinaries(self):
-        return self.session.query(Role).filter(Role.name=='ordinary').scalar()
+        return self.session.query(Role).filter(Role.name == 'ordinary').scalar()
 
     def get_all_ordinaries_count(self):
-        return len(self.session.query(Role).filter(Role.name=='ordinary').scalar().users)
-
+        return len(self.session.query(Role).filter(Role.name == 'ordinary').scalar().users)
 
     def get_all_category(self):
         return self.session.query(Category).all()
@@ -292,7 +290,6 @@ class SqlHelper(object):
     def get_tag_list(self):
         return self.session.query(Tag).all()
 
-
     def delete_users(self, users_id):
         try:
             # 删除用户会删除用户收藏文章，角色信息，但不会删除用户文章，文章作者显示未知
@@ -322,7 +319,6 @@ class SqlHelper(object):
         except Exception as e:
             return False
 
-
     def delete_categories(self, category_list):
         # 删除分类名，不删除分类下的文章
         try:
@@ -344,6 +340,14 @@ class SqlHelper(object):
         except Exception as e:
             return False
 
+    def change_category(self, id, category_name, category_basename):
+        try:
+            self.session.query(Category).filter(Category.id == id).update(
+                {"name": category_name, "basename": category_basename, "pub_date": get_datetime()})
+            self.session.commit()
+            return True
+        except Exception as e:
+            return False
 
 
 if __name__ == '__main__':

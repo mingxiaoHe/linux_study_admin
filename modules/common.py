@@ -29,6 +29,9 @@ def turn_userinfo_to_dict(user):
     return {"id": user.id, "username": user.username, "role": user.roles[0].name, "email": user.email,
             "create_date": str(user.create_date)}
 
+def turn_categoryinfo_to_dict(category):
+    return {"id": category.id, "name": category.name, "basename":category.basename, "pub_date": str(category.pub_date)}
+
 
 if __name__ == '__main__':
     obj = get_datetime()

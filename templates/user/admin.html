@@ -74,6 +74,8 @@
     </div>
 </form>
 <!--搜索结果页面 列表 结束-->
+
+
 <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="mySmallModalLabel">
     <div class="modal-dialog modal-sm" role="document">
         <div class="modal-content">
@@ -154,12 +156,14 @@
     var objDelete = document.getElementsByClassName("fa fa-trash");
     for (var i = 0; i < objDelete.length; i++) {
         objDelete[i].onclick = function () {
+            var obj_title = document.getElementById("myModalLabel");
+            obj_title.innerHTML = "删除用户";
             var objTr = this.parentNode.parentNode;
             var objTds = objTr.getElementsByTagName('td');
             var userId = objTds[1].innerHTML;
             var objModalBody = document.getElementsByClassName('modal-body')[0];
             var objBtn = document.getElementById('myModal').getElementsByClassName('btn btn-primary')[0];
-            objModalBody.innerHTML = "confirm Delete?";
+            objModalBody.innerHTML = "确定删除？";
             objBtn.onclick = function () {
                 delete_user({
                     id: userId

@@ -16,7 +16,7 @@ import json
 
 from tornado.options import define, options
 from modules.sqlhelper import SqlHelper
-from modules.common import get_md5_string, turn_to_int, turn_userinfo_to_dict
+from modules.common import get_md5_string, turn_to_int, turn_userinfo_to_dict, turn_categoryinfo_to_dict
 from modules import ui_methods
 from modules.PageHelper import Pager, PageInfo
 
@@ -26,6 +26,9 @@ sys.path.append(BASE_DIR)
 define('port', default=8001, help='run on the given port', type=int)
 
 DOMAIN = 'http://127.0.0.1:8000'
+
+STATUS_SUCCESS = {"status": True}
+STATUS_FAIL = {"status": False}
 
 
 class BaseHandler(tornado.web.RequestHandler):
@@ -407,56 +410,80 @@ class AjaxHandler(BaseHandler):
         self.set_header('Access-Control-Allow-Methods', 'POST, GET, OPTIONS')
 
     @tornado.web.asynchronous
-    def post(self, type):
-        status_success = {"status": True}
-        status_fail = {"status": False}
-        if type == 'change_user':
-            if type == 'change_user':
-                id = self.get_argument('id')
-                username = self.get_argument('username')
-                role = self.get_argument('role')
-                email = self.get_argument('email')
-                result = self.session.set_user_info(id, username, role, email)
-                user_info = SqlHelper().get_user_info_byid(id)
-                user = turn_userinfo_to_dict(user_info)
-                if result:
-                    self.write(tornado.escape.json_encode(user))
-                    self.finish()
-                else:
-                    self.write(tornado.escape.json_encode(status_fail))
-                    self.finish()
-        elif type == 'change_pass':
-            id = self.get_argument('id')
-            password = self.get_argument('password')
-            repassword = self.get_argument('repassword')
-            if password == repassword:
-                status = self.session.change_user_passwd_byid(id, get_md5_string(password))
-                if status:
-                    self.write(tornado.escape.json_encode(status_success))
-                    self.finish()
-                else:
-                    self.write(tornado.escape.json_encode(status_fail))
-                    self.finish()
-        elif type == 'delete_user':
-            id = self.get_argument('id')
-            status = self.session.delete_user_byid(id)
+    def post(self, types):
+        if hasattr(self, types):
+            func = getattr(self, types)
+            func()
+
+    def get(self, types):
+        if hasattr(self, types):
+            func = getattr(self, types)
+            func()
+
+    def get_category(self):
+        category_list = self.session.category()
+        ret = [{"name": category_obj.name, "basename": category_obj.basename} for category_obj in category_list]
+        self.write(tornado.escape.json_encode(ret))
+        self.finish()
+
+    def get_tag(self):
+        tag_list = self.session.get_tag_list()
+        ret = [ tag.name for tag in tag_list]
+        self.write(tornado.escape.json_encode(ret))
+        self.finish()
+
+    def change_user(self):
+        id = self.get_argument('id')
+        username = self.get_argument('username')
+        role = self.get_argument('role')
+        email = self.get_argument('email')
+        result = self.session.set_user_info(id, username, role, email)
+        user_info = SqlHelper().get_user_info_byid(id)
+        user = turn_userinfo_to_dict(user_info)
+        if result:
+            self.write(tornado.escape.json_encode(user))
+            self.finish()
+        else:
+            self.write(tornado.escape.json_encode(STATUS_FAIL))
+            self.finish()
+    def change_pass(self):
+        id = self.get_argument('id')
+        password = self.get_argument('password')
+        repassword = self.get_argument('repassword')
+        if password == repassword:
+            status = self.session.change_user_passwd_byid(id, get_md5_string(password))
             if status:
-                self.write(tornado.escape.json_encode({"id": id}))
+                self.write(tornado.escape.json_encode(STATUS_SUCCESS))
                 self.finish()
             else:
-                self.write(tornado.escape.json_encode(status_fail))
+                self.write(tornado.escape.json_encode(STATUS_FAIL))
                 self.finish()
-    def get(self, type):
-        if type == 'get_category':
-            category_list = self.session.category()
-            ret = [{"name": category_obj.name, "basename": category_obj.basename} for category_obj in category_list]
-            self.write(tornado.escape.json_encode(ret))
+    def delete_user(self):
+        id = self.get_argument('id')
+        status = self.session.delete_user_byid(id)
+        if status:
+            self.write(tornado.escape.json_encode({"id": id}))
             self.finish()
-        if type == 'get_tag':
-            tag_list = self.session.get_tag_list()
-            ret = [ tag.name for tag in tag_list]
-            self.write(tornado.escape.json_encode(ret))
+        else:
+            self.write(tornado.escape.json_encode(STATUS_FAIL))
             self.finish()
+
+
+    def change_category(self):
+        id = self.get_argument('id')
+        category_name = self.get_argument('categoryName')
+        category_basename = self.get_argument('categoryBasename')
+
+        status = self.session.change_category(id, category_name, category_basename)
+        if status:
+            category_info = self.session.get_category_info_byid(id)
+            category = turn_categoryinfo_to_dict(category_info)
+            self.write(category)
+            self.finish()
+        else:
+            self.write(tornado.escape.json_encode(STATUS_FAIL))
+            self.finish()
+
 
 
 
@@ -750,7 +777,7 @@ if __name__ == '__main__':
             (r'/article/(?P<type>\w+)/?(?P<page>\d+)?.html', ArticleHandler),
             (r'/category/(?P<type>\w+)/?(?P<page>\d+)?.html', CategoryHandler),
             (r'/tag/(?P<type>.*)/+(?P<page>\d+)?.html', TagHandler),
-            (r'/ajax/(?P<type>\w+)', AjaxHandler),
+            (r'/ajax/(?P<types>\w+)', AjaxHandler),
             (r'/links/(?P<type>\w+)/?(?P<page>\d+)?.html', LinksHandler),
             (r'/desc/(?P<type>\w+).html', DescriptionHandler),
             (r'/multi-delete/(?P<types>\w+).html', MultiDeleteHandler),
