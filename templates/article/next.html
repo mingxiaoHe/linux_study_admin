@@ -5,10 +5,9 @@
     <title>Title</title>
 </head>
 <body>
-    文章标题: <a href="">python操作mysql</a>
-    立即查看: <a href="">立即查看</a>
-    继续编辑: <a href="">继续编辑</a>
-    后台首页: <a href="后台首页"></a>
-    网站首页: <a href="">网站首页</a>
+    文章标题: <a href="{{ domain }}/post/{{ article.id }}.html" target="_blank">{{ article.title }}</a><br>
+    立即查看: <a href="{{ domain }}/post/{{ article.id }}.html" target="_blank">立即查看</a><br>
+    继续编辑: <a href="/article/edit/{{ article.id }}.html">继续编辑</a><br>
+    网站首页: <a href="{{ domain }}" target="_blank">网站首页</a>
 </body>
 </html>

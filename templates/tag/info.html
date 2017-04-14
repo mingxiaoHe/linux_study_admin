@@ -5,6 +5,9 @@
     <link rel="stylesheet" href="/static/style/css/ch-ui.admin.css">
     <link rel="stylesheet" href="/static/style/font/css/font-awesome.min.css">
     <script type="text/javascript" src="/static/style/js/jquery.js"></script>
+    <link rel="stylesheet" href="/static/style/css/bootstrap-theme.min.css">
+    <link rel="stylesheet" href="/static/style/css/bootstrap.min.css">
+    <script type="text/javascript" src="/static/style/js/bootstrap.min.js"></script>
     <script type="text/javascript" src="/static/style/js/ch-ui.admin.js"></script>
 </head>
 <body>
@@ -35,8 +38,7 @@
         <!--快捷导航 开始-->
         <div class="result_content">
             <div class="short_wrap">
-                <a href="#"><i class="fa fa-plus"></i>新增用户</a>
-                <input class="fa fa-recycle" type="submit" value="批量删除">
+                <i class="fa fa-recycle" style="color:rgb(53,121,183)"></i><input style="color:rgb(53,121,183) ;background: none;border: none;outline:none;display:inline-block;margin: 0;padding: 0;margin-top: -4px" type="submit" value="批量删除">
             </div>
         </div>
         <!--快捷导航 结束-->
@@ -61,8 +63,10 @@
                     <td>{{ tag.pub_date }}</td>
 
                     <td>
-                        <i class="fa fa-pencil-square-o" aria-hidden="true"></i>
-                        <i class="fa fa-trash" aria-hidden="true"></i>
+                        <i class="fa fa-pencil-square-o" aria-hidden="true" class="btn btn-primary btn-lg"
+                           data-toggle="modal" data-target="#myModal"></i>
+                        <i class="fa fa-trash" aria-hidden="true" class="btn btn-primary btn-lg"
+                           data-toggle="modal" data-target="#myModal"></i>
                     </td>
                 </tr>
                 {% end %}
@@ -80,5 +84,126 @@
     </div>
 </form>
 <!--搜索结果页面 列表 结束-->
+
+
+<div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="mySmallModalLabel">
+    <div class="modal-dialog modal-sm" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
+                        aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title" id="myModalLabel">Modal title</h4>
+            </div>
+            <div class="modal-body">
+                ...
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary" data-dismiss="modal">Save changes</button>
+            </div>
+        </div>
+    </div>
+</div>
 </body>
+
+<script>
+    var objEdit = document.getElementsByClassName("fa-pencil-square-o");
+    for (var i = 0; i < objEdit.length; i++) {
+        objEdit[i].onclick = function () {
+
+            var obj_title = document.getElementById("myModalLabel");
+            obj_title.innerHTML = "修改分类信息";
+
+            var objTr = this.parentNode.parentNode;
+            var objTds = objTr.getElementsByTagName('td');
+            var tagId = objTds[1].innerHTML;
+            var tagName = objTds[2].innerHTML;
+            var objModalBody = document.getElementsByClassName('modal-body')[0];
+            objModalBody.innerHTML = "<label>标签名:</label><br/><input type='text' style='width:70%' name='tagName' value='" + tagName + "'/><br/>";
+            var objBtn = document.getElementById('myModal').getElementsByClassName('btn btn-primary')[0];
+            objBtn.onclick = function () {
+                change_tag({
+                    id: tagId,
+                    tagName: document.getElementsByName('tagName')[0].value,
+                    Name: document.getElementsByName('tagName')[0].value
+                }, '/ajax/change_tag')
+            }
+        }
+    }
+    var change_tag = function (data, url) {
+        data._xsrf = getCookie("_xsrf");
+        $.ajax({
+            url: url,
+            type: 'POST', //GET
+            async: true,    //或false,是否异步
+            data: data,
+            timeout: 5000,    //超时时间
+            dataType: 'json',    //返回的数据格式：json/xml/html/script/jsonp/text
+
+            success: function (data) {
+                var objEdit = document.getElementsByClassName("list_tab")[0].getElementsByTagName('tr');
+                for (var i = 1; i < objEdit.length; i++) {
+                    if (objEdit[i].getElementsByTagName('td')[1].innerText == data.id) {
+                        var str = '<td class="tc"><input type="checkbox" name="id[]" value="59"></td><td class="tc">' + data.id + '</td>' +
+                            '<td>' + data.name + '</td>' + '<td>' + data.pub_date + '</td>'
+                            + '<td><i class="fa fa-pencil-square-o" aria-hidden="true" class="btn btn-primary btn-lg" data-toggle="modal" data-target="#myModal"></i>' +
+                            '<i class="fa fa-trash" aria-hidden="true" class="btn btn-primary btn-lg" data-toggle="modal" data-target="#myModal"></i></td>';
+                        objEdit[i].innerHTML = str;
+                    }
+                }
+            },
+            error: function (xhr, textStatus) {
+                console.log(xhr);
+                console.log(textStatus);
+            }
+        });
+    };
+
+    var objDelete = document.getElementsByClassName("fa fa-trash");
+    for (var i = 0; i < objDelete.length; i++) {
+        objDelete[i].onclick = function () {
+            var obj_title = document.getElementById("myModalLabel");
+            obj_title.innerHTML = "删除标签";
+            var objTr = this.parentNode.parentNode;
+            var objTds = objTr.getElementsByTagName('td');
+            var tagId = objTds[1].innerHTML;
+            var objModalBody = document.getElementsByClassName('modal-body')[0];
+            var objBtn = document.getElementById('myModal').getElementsByClassName('btn btn-primary')[0];
+            objModalBody.innerHTML = "确定删除？";
+            objBtn.onclick = function () {
+                delete_tag({
+                    id: tagId
+                }, '/ajax/delete_tag')
+            }
+        }
+    }
+
+    var delete_tag = function (data, url) {
+        data._xsrf = getCookie("_xsrf");
+        $.ajax({
+            url: url,
+            type: 'POST', //GET
+            async: true,    //或false,是否异步
+            data: data,
+            timeout: 5000,    //超时时间
+            dataType: 'json',    //返回的数据格式：json/xml/html/script/jsonp/text
+
+            success: function (data) {
+                var objEdit = document.getElementsByClassName("list_tab")[0].getElementsByTagName('tr');
+                for (var i = 1; i < objEdit.length; i++) {
+                    if (objEdit[i].getElementsByTagName('td')[1].innerText == data.id) {
+                        objEdit[i].parentNode.removeChild(objEdit[i]);
+                        break;
+                    }
+                }
+            },
+            error: function (xhr, textStatus) {
+                console.log(xhr);
+                console.log(textStatus);
+            }
+        });
+    };
+
+</script>
+
 </html>

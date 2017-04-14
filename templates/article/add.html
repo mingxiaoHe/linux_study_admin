@@ -16,18 +16,6 @@
             width: 100%;
         }
 
-        /*#articleAdd input[type=text],textarea{*/
-        /*display: inline-block;*/
-        /*width: 100%;*/
-        /*outline: none;*/
-        /*}*/
-        /*#articleAdd textarea{*/
-        /*resize: none;*/
-        /*}*/
-        /*#articleAdd input[type=checkbox]{*/
-        /*display: inline-block;*/
-        /*margin-left: 5%;*/
-        /*}*/
         #articleAdd label.myLabel {
             display: block;
             border-bottom: 1px dashed gray;
@@ -45,7 +33,6 @@
 {% except %}
     <form action="/article/add.html" method="post" id="articleAdd">
 {% end %}
-    <!--<form action="/article/add.html" method="post" id="articleAdd">-->
         <div class="form-group">
             <label class="myLabel">标题</label>
             {% try %}

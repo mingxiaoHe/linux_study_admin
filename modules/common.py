@@ -33,6 +33,15 @@ def turn_categoryinfo_to_dict(category):
     return {"id": category.id, "name": category.name, "basename":category.basename, "pub_date": str(category.pub_date)}
 
 
+def turn_linkinfo_to_dict(link):
+    return {"id": link.id, "name": link.name, "callback_url": link.callback_url, "pub_date": str(link.pub_date)}
+
+def turn_taginfo_to_dict(tag):
+    return {"id": tag.id, "name": tag.name, "pub_date": str(tag.pub_date)}
+
+def turn_descinfo_to_dict(desc):
+    return {"id": desc.id, "content": desc.content, "pub_date": str(desc.pub_date)}
+
 if __name__ == '__main__':
     obj = get_datetime()
     print(obj)

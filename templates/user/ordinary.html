@@ -20,57 +20,57 @@
 
 <!--搜索结果页面 列表 开始-->
 <form action="/multi-delete/user.html" method="post">
-        <div class="result_wrap">
-            <!--快捷导航 开始-->
-            <div class="result_content">
-                <div class="short_wrap">
-                    <a href="#"><i class="fa fa-plus"></i>新增用户</a>
+    <div class="result_wrap">
+        <!--快捷导航 开始-->
+        <div class="result_content">
+            <div class="short_wrap">
+                <i class="fa fa-plus" data-toggle="modal" data-target="#myModal" style="color:rgb(53,121,183)"> 新增用户</i>
+            </div>
+        </div>
+        <!--快捷导航 结束-->
+    </div>
+
+    <div class="result_wrap">
+        <div class="result_content">
+            <table class="list_tab">
+                <tr>
+                    <th class="tc" width="5%"><input type="checkbox" name=""></th>
+                    <th class="tc">ID</th>
+                    <th>用户</th>
+                    <th>角色</th>
+                    <th>邮箱</th>
+                    <th>更新时间</th>
+                    <th>操作</th>
+                </tr>
+
+                {% for user in ordinaries %}
+                <tr>
+                    <td class="tc"><input type="checkbox" name="user_id" value="{{ user.id }}"></td>
+                    <td class="tc">{{ user.id }}</td>
+                    <td>{{ user.username }}</td>
+                    <td>{% for role in user.roles %}{{ role.name }}{% end %}</td>
+                    <td>{{ user.email }}</td>
+                    <td>{{ user.create_date }}</td>
+                    <td>
+                        <i class="fa fa-pencil-square-o" aria-hidden="true" class="btn btn-primary btn-lg"
+                           data-toggle="modal" data-target="#myModal"></i>
+                        <i class="fa fa-key" aria-hidden="true" class="btn btn-primary btn-lg"
+                           data-toggle="modal" data-target="#myModal"></i>
+                        <i class="fa fa-trash" aria-hidden="true" class="btn btn-primary btn-lg"
+                           data-toggle="modal" data-target="#myModal"></i>
+                    </td>
+                </tr>
+                {% end %}
+            </table>
+
+            <div class="page_nav">
+                <div>
+                    {% for line in page_string %}
+                    {% raw line %}
+                    {% end %}
                 </div>
             </div>
-            <!--快捷导航 结束-->
         </div>
-
-        <div class="result_wrap">
-            <div class="result_content">
-                <table class="list_tab">
-                    <tr>
-                        <th class="tc" width="5%"><input type="checkbox" name=""></th>
-                        <th class="tc">ID</th>
-                        <th>用户</th>
-                        <th>角色</th>
-                        <th>邮箱</th>
-                        <th>更新时间</th>
-                        <th>操作</th>
-                    </tr>
-
-                    {% for user in ordinaries %}
-                    <tr>
-                        <td class="tc"><input type="checkbox" name="user_id" value="{{ user.id }}"></td>
-                        <td class="tc">{{ user.id }}</td>
-                        <td>{{ user.username }}</td>
-                        <td>{% for role in user.roles %}{{ role.name }}{% end %}</td>
-                        <td>{{ user.email }}</td>
-                        <td>{{ user.create_date }}</td>
-                        <td>
-                            <i class="fa fa-pencil-square-o" aria-hidden="true" class="btn btn-primary btn-lg"
-                               data-toggle="modal" data-target="#myModal"></i>
-                            <i class="fa fa-key" aria-hidden="true" class="btn btn-primary btn-lg"
-                               data-toggle="modal" data-target="#myModal"></i>
-                            <i class="fa fa-trash" aria-hidden="true" class="btn btn-primary btn-lg"
-                               data-toggle="modal" data-target="#myModal"></i>
-                        </td>
-                    </tr>
-                    {% end %}
-                </table>
-
-    <div class="page_nav">
-        <div>
-        {% for line in page_string %}
-            {% raw line %}
-        {% end %}
-        </div>
-    </div>
-    </div>
     </div>
 </form>
 <!--搜索结果页面 列表 结束-->
@@ -97,6 +97,51 @@
 
 
 <script>
+
+    var objAdd = document.getElementsByClassName("fa fa-plus")[0];
+    objAdd.onclick = function () {
+        var obj_title = document.getElementById("myModalLabel");
+        obj_title.innerHTML = "添加用户";
+        var objModalBody = document.getElementsByClassName('modal-body')[0];
+        objModalBody.innerHTML = "<label>用户名:</label><br/><input type='text' style='width:70%' name='username' value=''/><br/>";
+        objModalBody.innerHTML += "<label>密码:</label><br/><input type='text' style='width:70%' name='password' value=''/><br/>";
+        objModalBody.innerHTML += "<label>邮箱:</label><br/><input type='text' style='width:70%' name='email' value=''/><br/>";
+        objModalBody.innerHTML += "<label>角色:</label><br/><select name='role' id=''><option value='admin' >管理员</option><option value='ordinary' selected='selected'>普通用户</option></select><br/>";
+        var objBtn = document.getElementById('myModal').getElementsByClassName('btn btn-primary')[0];
+        objBtn.onclick = function () {
+            create_user({
+                username: document.getElementsByName('username')[0].value,
+                role: document.getElementsByName('role')[0].value,
+                email: document.getElementsByName('email')[0].value,
+                password: document.getElementsByName('password')[0].value
+            }, '/ajax/create_user')
+        }
+    };
+
+    var create_user = function (data, url) {
+        data._xsrf = getCookie("_xsrf");
+        $.ajax({
+            url: url,
+            type: 'POST', //GET
+            async: true,    //或false,是否异步
+            data: data,
+            timeout: 5000,    //超时时间
+            dataType: 'json',    //返回的数据格式：json/xml/html/script/jsonp/text
+
+            success: function (data) {
+                if (data.status) {
+                    location.reload()
+                } else {
+                    alert('添加用户失败')
+                }
+            },
+            error: function (xhr, textStatus) {
+                console.log(xhr);
+                console.log(textStatus);
+            }
+        });
+    };
+
     var objEdit = document.getElementsByClassName("fa-pencil-square-o");
     for (var i = 0; i < objEdit.length; i++) {
         objEdit[i].onclick = function () {

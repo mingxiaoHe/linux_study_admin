@@ -11,12 +11,11 @@ import tornado.gen
 import tornado.concurrent
 import tornado.escape
 import tornado
-import time
-import json
 
 from tornado.options import define, options
 from modules.sqlhelper import SqlHelper
-from modules.common import get_md5_string, turn_to_int, turn_userinfo_to_dict, turn_categoryinfo_to_dict
+from modules.common import get_md5_string, turn_to_int, turn_userinfo_to_dict, turn_categoryinfo_to_dict, \
+    turn_linkinfo_to_dict, turn_taginfo_to_dict, turn_descinfo_to_dict
 from modules import ui_methods
 from modules.PageHelper import Pager, PageInfo
 
@@ -44,7 +43,10 @@ class IndexHandler(BaseHandler):
     @tornado.web.authenticated
     @tornado.web.asynchronous
     def get(self):
-        self.render('index.html')
+        self.render('index.html',
+                    domain=DOMAIN,
+                    user=super().get_current_user(),
+                    )
 
 
 class UrlHandler(BaseHandler):
@@ -57,7 +59,6 @@ class UrlHandler(BaseHandler):
 
     def admin(self, page):
         page = turn_to_int(page, 1)
-        # 此分类下的所有文章
         all_admins = self.session.get_all_admins().users
 
         # uri的dirname
@@ -79,6 +80,7 @@ class UrlHandler(BaseHandler):
                     admins=all_admins[page_obj.start:page_obj.end],
                     page_string=page_string,
                     )
+
     def ordinary(self, page):
 
         page = turn_to_int(page, 1)
@@ -104,6 +106,7 @@ class UrlHandler(BaseHandler):
                     ordinaries=all_ordinaries[page_obj.start:page_obj.end],
                     page_string=page_string,
                     )
+
 
 class ArticleHandler(BaseHandler):
     @tornado.web.asynchronous
@@ -134,10 +137,8 @@ class ArticleHandler(BaseHandler):
                         )
         elif type == 'add':
             self.render('article/add.html',
-                        categories = self.session.get_all_category(),
+                        categories=self.session.get_all_category(),
                         )
-        elif type == 'next':
-            self.render('article/next.html')
 
     def post(self, type, page):
         if type == 'add':
@@ -146,11 +147,13 @@ class ArticleHandler(BaseHandler):
             description = self.get_argument('description')
             tag = self.get_argument('tag').split()
             category = self.get_argument('category')
-            status = self.session.add_article(title, description, category, tag, content, super().get_current_user())
-            if status:
-                self.redirect('/article/next.html')
-            else:
-                print(222)
+            article = self.session.add_article(title, description, category, tag, content, super().get_current_user())
+            if article:
+                self.render('article/next.html',
+                            domain=DOMAIN,
+                            article=article,
+                            )
+
 
 class ArticleEditHandler(BaseHandler):
     def get(self, id):
@@ -158,17 +161,20 @@ class ArticleEditHandler(BaseHandler):
                     article_info=self.session.get_article_byid(id),
                     categories=self.session.get_all_category(),
                     )
+
     def post(self, id):
         title = self.get_argument('title')
         content = self.get_argument('content')
         description = self.get_argument('description')
         tag = self.get_argument('tag').split()
         category = self.get_argument('category')
-        status = self.session.update_article(id, title, description, category, tag, content)
-        if status:
-            self.redirect('/article/next.html')
-        else:
-            print(222)
+        article = self.session.update_article(id, title, description, category, tag, content)
+
+        if article:
+            self.render('article/next.html',
+                        domain=DOMAIN,
+                        article=article,
+                        )
 
 
 class CategoryHandler(BaseHandler):
@@ -198,7 +204,7 @@ class CategoryHandler(BaseHandler):
             self.render('category/info.html',
                         categories=all_category[page_obj.start:page_obj.end],
                         page_string=page_string,
-                        category = self.session.get_category_info_by_basename(type),
+                        category=self.session.get_category_info_by_basename(type),
                         )
         else:
             page = turn_to_int(page, 1)
@@ -273,7 +279,7 @@ class TagHandler(BaseHandler):
             count = self.session.get_tag_articles_count(tag.id)
 
             # 检测页数是否合法，如果页数超过
-            page_obj = PageInfo(page, count, per_item=1)
+            page_obj = PageInfo(page, count, per_item=5)
             all_page_count = page_obj.all_page_count
             if page > all_page_count:
                 page = all_page_count
@@ -286,6 +292,7 @@ class TagHandler(BaseHandler):
                         tag_articles=tag_articles[page_obj.start:page_obj.end],
                         page_string=page_string,
                         )
+
 
 class LinksHandler(BaseHandler):
     @tornado.web.asynchronous
@@ -302,7 +309,7 @@ class LinksHandler(BaseHandler):
             count = self.session.get_links_count()
 
             # 检测页数是否合法，如果页数超过
-            page_obj = PageInfo(page, count, per_item=3)
+            page_obj = PageInfo(page, count, per_item=5)
             all_page_count = page_obj.all_page_count
             if page > all_page_count:
                 page = all_page_count
@@ -316,8 +323,6 @@ class LinksHandler(BaseHandler):
                         page_string=page_string,
                         )
 
-    def post(self, type):
-        pass
 
 class DescriptionHandler(BaseHandler):
     def get(self, type):
@@ -325,6 +330,7 @@ class DescriptionHandler(BaseHandler):
             self.render('desc/info.html',
                         descs=self.session.get_description(),
                         )
+
 
 class LoginHandler(BaseHandler):
     @tornado.web.asynchronous
@@ -338,20 +344,21 @@ class LoginHandler(BaseHandler):
     def post(self):
         username = self.get_argument('username')
         password = self.get_argument('password')
-
         user_obj = self.session.get_user_info(username)
-
-        if username == user_obj.username and get_md5_string(password) == user_obj.password:
+        if user_obj and user_obj.roles[0].name == 'admin' and username == user_obj.username and get_md5_string(
+                password) == user_obj.password:
             self.set_secure_cookie('user_name', self.get_argument('username'), expires_days=None)
             self.redirect('/')
         else:
-            self.redirect('/user/error')
+            self.render('login.html', error_msg='错误的用户名或密码')
+
 
 class LogoutHandler(BaseHandler):
     @tornado.web.asynchronous
     def get(self):
-        self.clear_cookie('username')
+        self.clear_cookie('user_name')
         self.redirect('/login')
+
 
 class MultiDeleteHandler(BaseHandler):
     @tornado.web.asynchronous
@@ -373,7 +380,6 @@ class MultiDeleteHandler(BaseHandler):
         status = self.session.delete_categories(category_id_list)
         if status:
             self.redirect('/category/info/1.html')
-
 
     def cate_article(self):
         articles_id_list = self.get_arguments('article_id')
@@ -401,6 +407,11 @@ class MultiDeleteHandler(BaseHandler):
         if status:
             self.redirect('/tag/info/1.html')
 
+    def links(self):
+        link_id_list = self.get_arguments('link_id')
+        status = self.session.delete_links(link_id_list)
+        if status:
+            self.redirect('/links/info/1.html')
 
 
 class AjaxHandler(BaseHandler):
@@ -428,7 +439,7 @@ class AjaxHandler(BaseHandler):
 
     def get_tag(self):
         tag_list = self.session.get_tag_list()
-        ret = [ tag.name for tag in tag_list]
+        ret = [tag.name for tag in tag_list]
         self.write(tornado.escape.json_encode(ret))
         self.finish()
 
@@ -446,6 +457,7 @@ class AjaxHandler(BaseHandler):
         else:
             self.write(tornado.escape.json_encode(STATUS_FAIL))
             self.finish()
+
     def change_pass(self):
         id = self.get_argument('id')
         password = self.get_argument('password')
@@ -458,6 +470,7 @@ class AjaxHandler(BaseHandler):
             else:
                 self.write(tornado.escape.json_encode(STATUS_FAIL))
                 self.finish()
+
     def delete_user(self):
         id = self.get_argument('id')
         status = self.session.delete_user_byid(id)
@@ -468,28 +481,46 @@ class AjaxHandler(BaseHandler):
             self.write(tornado.escape.json_encode(STATUS_FAIL))
             self.finish()
 
-
     def delete_category(self):
         """删除一个分类"""
-        category_id_list = self.get_arguments('id')
-        status = self.session.delete_categories(category_id_list)
+        category_id = self.get_arguments('id')
+        status = self.session.delete_categories(category_id)
         if status:
-            self.write(tornado.escape.json_encode({"id": category_id_list[0]}))
+            self.write(tornado.escape.json_encode({"id": category_id}))
             self.finish()
         else:
             self.write(tornado.escape.json_encode(STATUS_FAIL))
             self.finish()
 
     def delete_article(self):
-        article_id_list = self.get_arguments('id')
-        status = self.session.delete_articles(article_id_list)
+        article_id = self.get_arguments('id')
+        status = self.session.delete_articles(article_id)
         if status:
-            self.write(tornado.escape.json_encode({"id": article_id_list[0]}))
+            self.write(tornado.escape.json_encode({"id": article_id}))
             self.finish()
         else:
             self.write(tornado.escape.json_encode(STATUS_FAIL))
             self.finish()
 
+    def delete_link(self):
+        link_id = self.get_arguments('id')
+        status = self.session.delete_links(link_id)
+        if status:
+            self.write(tornado.escape.json_encode({"id": link_id}))
+            self.finish()
+        else:
+            self.write(tornado.escape.json_encode(STATUS_FAIL))
+            self.finish()
+
+    def delete_tag(self):
+        tag_id = self.get_argument('id')
+        status = self.session.delete_tags(tag_id)
+        if status:
+            self.write(tornado.escape.json_encode({"id": tag_id}))
+            self.finish()
+        else:
+            self.write(tornado.escape.json_encode(STATUS_FAIL))
+            self.finish()
 
     def change_category(self):
         id = self.get_argument('id')
@@ -506,9 +537,83 @@ class AjaxHandler(BaseHandler):
             self.write(tornado.escape.json_encode(STATUS_FAIL))
             self.finish()
 
+    def change_link(self):
+        id = self.get_argument('id')
+        link_name = self.get_argument('linkName')
+        link_url = self.get_argument('linkUrl')
+        status = self.session.change_link(id, link_name, link_url)
 
+        if status:
+            link_info = self.session.get_link_info_byid(id)
+            link = turn_linkinfo_to_dict(link_info)
+            self.write(link)
+            self.finish()
+        else:
+            self.write(tornado.escape.json_encode(STATUS_FAIL))
+            self.finish()
 
+    def change_tag(self):
+        id = self.get_argument('id')
+        tag_name = self.get_argument('tagName')
+        status = self.session.change_tag(id, tag_name)
 
+        if status:
+            tag_info = self.session.get_tag_info_byid(id)
+            tag = turn_taginfo_to_dict(tag_info)
+            self.write(tag)
+            self.finish()
+        else:
+            self.write(tornado.escape.json_encode(STATUS_FAIL))
+            self.finish()
+
+    def change_desc(self):
+        id = self.get_argument('id')
+        desc_content = self.get_argument('descContent')
+        status = self.session.change_description(id, desc_content)
+        if status:
+            desc_info = self.session.get_description_byid(id)
+            desc = turn_descinfo_to_dict(desc_info)
+            self.write(desc)
+            self.finish()
+        else:
+            self.write(tornado.escape.json_encode(STATUS_FAIL))
+            self.finish()
+
+    def create_user(self):
+        username = self.get_argument('username')
+        password = self.get_argument('password')
+        role = self.get_argument('role')
+        email = self.get_argument('email')
+        status = self.session.regist(username=username, password=get_md5_string(password), role=role, email=email)
+        if status:
+            self.write(tornado.escape.json_encode(STATUS_SUCCESS))
+            self.finish()
+        else:
+            self.write(tornado.escape.json_encode(STATUS_FAIL))
+            self.finish()
+
+    def add_category(self):
+        name = self.get_argument('categoryName')
+        basename = self.get_argument('basename')
+        status = self.session.add_category(name, basename)
+        if status:
+            self.write(tornado.escape.json_encode(STATUS_SUCCESS))
+            self.finish()
+        else:
+            self.write(tornado.escape.json_encode(STATUS_FAIL))
+            self.finish()
+
+    def add_link(self):
+        name = self.get_argument('linkName')
+        callback_url = self.get_argument('linkUrl')
+        print(name, callback_url)
+        status = self.session.add_link(name, callback_url)
+        if status:
+            self.write(tornado.escape.json_encode(STATUS_SUCCESS))
+            self.finish()
+        else:
+            self.write(tornado.escape.json_encode(STATUS_FAIL))
+            self.finish()
 
 
 try:
@@ -771,11 +876,9 @@ class UploadHandler(tornado.web.RequestHandler):
                     yield self.save_file(base_dir=u4Ts.config['filePathFormat'], fileobj=fileobj, is_image=False)
 
 
-
-
 import logging
-logging.basicConfig(level=logging.DEBUG)
 
+logging.basicConfig(level=logging.DEBUG)
 
 if __name__ == '__main__':
     tornado.options.parse_command_line()
@@ -808,7 +911,7 @@ if __name__ == '__main__':
             (r'/upload', UploadHandler),
             # (r'/ueditor', UeditorHandler),
             (r'/static/(.*)', tornado.web.StaticFileHandler, {'path': 'static'}),
-            (r'/upload/(.*)', tornado.web.StaticFileHandler, {'path':'upload'}),
+            (r'/upload/(.*)', tornado.web.StaticFileHandler, {'path': 'upload'}),
         ], **settings
     )
     http_server = tornado.httpserver.HTTPServer(app)

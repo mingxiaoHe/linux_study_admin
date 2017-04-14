@@ -26,6 +26,15 @@ class SqlHelper(object):
     def get_category_info_byid(self, id):
         return self.session.query(Category).filter(Category.id == id).first()
 
+    def get_link_info_byid(self, id):
+        return self.session.query(Links).filter(Links.id == id).first()
+
+    def get_tag_info_byid(self, id):
+        return self.session.query(Tag).filter(Tag.id == id).first()
+
+    def get_description_byid(self, id):
+        return self.session.query(Description).filter(Description.id == id).first()
+
     def get_category_count(self):
         return self.session.query(Category).count()
 
@@ -41,23 +50,33 @@ class SqlHelper(object):
     def get_links_count(self):
         return self.session.query(Links).count()
 
-    def regist(self, username, password, email):
+    def regist(self, username, password, email, role='ordinary'):
         """
         注册用户，从首页注册的都是普通用户，后台注册可以指定是什么用户
         :return:
         """
-        # self.session.add(User(username=username, password=password, email=email))
-        # self.session.add(Role(name='ordinary'))
-        # self.session.commit()
         try:
-            user = User(username=username, password=password, email=email)
-            role = Role(name='ordinary')
-            user.roles = [role]
-            self.session.add_all([user, role])
+            user = User(username=username, password=password, email=email, create_date=get_datetime())
+            role_obj = self.session.query(Role).filter(Role.name == role).first()
+            role_list = []
+            if role_obj is not None:
+                role = role_obj
+                role_list.append(role)
+            else:
+                role = Role()
+                role.name = role
+                role_list.append(role)
+                self.session.add(role)
+                self.session.commit()
+
+
+            user.roles = role_list
+            self.session.add(user)
             self.session.commit()
             return True
-        except IntegrityError as e:
+        except Exception as e:
             return False
+
 
     def change_user_email(self, username, email):
         try:
@@ -187,6 +206,7 @@ class SqlHelper(object):
 
     def get_all_admins(self):
         return self.session.query(Role).filter(Role.name == 'admin').scalar()
+        # return self.session.query(Role).filter(Role.name == 'admin').all()
 
     def get_all_admins_count(self):
         return len(self.session.query(Role).filter(Role.name == 'admin').scalar().users)
@@ -241,7 +261,7 @@ class SqlHelper(object):
             # print(tag_list)
             self.session.add(article)
             self.session.commit()
-            return True
+            return article
         except Exception as e:
             return False
 
@@ -277,13 +297,11 @@ class SqlHelper(object):
                     tag_list.append(tag)
                     self.session.add(tag)
                     self.session.commit()
-            # print(tag_list)
             article = self.session.query(Article).filter(Article.id == id).first()
             article.tags = tag_list
-            # print(tag_list)
             self.session.add(article)
             self.session.commit()
-            return True
+            return article
         except Exception as e:
             return False
 
@@ -319,6 +337,14 @@ class SqlHelper(object):
         except Exception as e:
             return False
 
+    def delete_links(self, link_id_list):
+        try:
+            self.session.query(Links).filter(Links.id.in_(link_id_list)).delete(synchronize_session=False)
+            self.session.commit()
+            return True
+        except Exception as e:
+            return False
+
     def delete_categories(self, category_list):
         # 删除分类名，不删除分类下的文章
         try:
@@ -350,8 +376,56 @@ class SqlHelper(object):
         except Exception as e:
             return False
 
+    def change_link(self, id, link_name, link_url):
+        try:
+            self.session.query(Links).filter(Links.id == id).update(
+                {"name": link_name, "callback_url": link_url, "pub_date": get_datetime()})
+            self.session.commit()
+            return True
+        except Exception as e:
+            return False
+
+    def change_tag(self, id, tag_name):
+        print(tag_name)
+        try:
+            self.session.query(Tag).filter(Tag.id == id).update(
+                {"name": tag_name, "pub_date": get_datetime()})
+            self.session.commit()
+            return True
+        except Exception as e:
+            return False
+
+    def change_description(self, id, content):
+        try:
+            self.session.query(Description).filter(Description.id == id).update(
+                {"content": content, "pub_date": get_datetime()})
+            self.session.commit()
+            return True
+        except Exception as e:
+            return False
+
+    def add_category(self, name, basename):
+        try:
+            category = Category(name=name, basename=basename, pub_date=get_datetime())
+            self.session.add(category)
+            self.session.commit()
+            return True
+        except Exception as e:
+            return False
+
+    def add_link(self, name, callback_url):
+        try:
+            link = Links(name=name, callback_url=callback_url, pub_date=get_datetime())
+            self.session.add(link)
+            self.session.commit()
+            return True
+        except Exception as e:
+            return False
+
 
 if __name__ == '__main__':
     obj = SqlHelper()
     ret = obj.get_all_admins()
+    for m in ret:
+        print(m.name)
     print(ret)

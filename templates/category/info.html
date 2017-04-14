@@ -38,9 +38,8 @@
         <!--快捷导航 开始-->
         <div class="result_content">
             <div class="short_wrap">
-                <a href="#"><i class="fa fa-plus"></i>新增用户</a>
-                <!--<a href="#"><i class="fa fa-recycle"></i>批量删除</a>                    -->
-                <input class="fa fa-recycle" type="submit" value="批量删除">
+                <i class="fa fa-plus" data-toggle="modal" data-target="#myModal" style="color:rgb(53,121,183)"> 新增分类</i>
+                <i class="fa fa-recycle" style="color:rgb(53,121,183)"></i><input style="color:rgb(53,121,183) ;background: none;border: none;outline:none;display:inline-block;margin: 0;padding: 0;margin-top: -4px" type="submit" value="批量删除">
             </div>
         </div>
         <!--快捷导航 结束-->
@@ -108,6 +107,49 @@
 </body>
 
 <script>
+
+    var objAdd = document.getElementsByClassName("fa fa-plus")[0];
+    objAdd.onclick = function () {
+        var obj_title = document.getElementById("myModalLabel");
+        obj_title.innerHTML = "添加分类";
+        var objModalBody = document.getElementsByClassName('modal-body')[0];
+        objModalBody.innerHTML = "<label>名称:</label><br/><input type='text' style='width:70%' name='categoryName' value=''/><br/>";
+        objModalBody.innerHTML += "<label>basename:</label><br/><input type='text' style='width:70%' name='basename' value=''/><br/>";
+        var objBtn = document.getElementById('myModal').getElementsByClassName('btn btn-primary')[0];
+        objBtn.onclick = function () {
+            add_category({
+                categoryName: document.getElementsByName('categoryName')[0].value,
+                basename: document.getElementsByName('basename')[0].value,
+            }, '/ajax/add_category')
+        }
+    };
+
+    var add_category = function (data, url) {
+        data._xsrf = getCookie("_xsrf");
+        $.ajax({
+            url: url,
+            type: 'POST', //GET
+            async: true,    //或false,是否异步
+            data: data,
+            timeout: 5000,    //超时时间
+            dataType: 'json',    //返回的数据格式：json/xml/html/script/jsonp/text
+
+            success: function (data) {
+                if (data.status) {
+                    location.reload()
+                } else {
+                    alert('添加分类失败')
+                }
+            },
+            error: function (xhr, textStatus) {
+                console.log(xhr);
+                console.log(textStatus);
+            }
+        });
+    };
+
+
+
     var objEdit = document.getElementsByClassName("fa-pencil-square-o");
     for (var i = 0; i < objEdit.length; i++) {
         objEdit[i].onclick = function () {
