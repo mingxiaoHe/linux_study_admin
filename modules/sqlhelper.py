@@ -11,7 +11,7 @@ from modules.common import turn_bytes_to_str, get_datetime
 
 class SqlHelper(object):
     def __init__(self):
-        self.engine = create_engine(SQLALCHEMY_DATABASE_URI)
+        self.engine = create_engine(SQLALCHEMY_DATABASE_URI, echo=True)
         Session = sessionmaker(bind=self.engine, autoflush=False, autocommit=False)
         self.session = Session()
 
@@ -238,9 +238,6 @@ class SqlHelper(object):
                 last_modify_date=now_time,
             )
 
-            # for tag in tags:
-            #     article.tags.append(Tag.name==tag)  # 添加标签
-
             # 标签名重复不添加，不重复添加
             tag_list = []
             for tmp in tags:
@@ -258,7 +255,6 @@ class SqlHelper(object):
                     self.session.commit()
 
             article.tags = tag_list
-            # print(tag_list)
             self.session.add(article)
             self.session.commit()
             return article
@@ -423,9 +419,3 @@ class SqlHelper(object):
             return False
 
 
-if __name__ == '__main__':
-    obj = SqlHelper()
-    ret = obj.get_all_admins()
-    for m in ret:
-        print(m.name)
-    print(ret)

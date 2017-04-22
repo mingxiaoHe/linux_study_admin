@@ -47,7 +47,14 @@ class IndexHandler(BaseHandler):
                     domain=DOMAIN,
                     user=super().get_current_user(),
                     )
-
+class WelcomeHandler(BaseHandler):
+    @tornado.web.asynchronous
+    def get(self, welcome):
+        if hasattr(self, welcome):
+            func = getattr(self, welcome)
+            func()
+    def welcome(self):
+        self.render('welcome.html')
 
 class UrlHandler(BaseHandler):
     @tornado.web.authenticated
@@ -896,7 +903,6 @@ if __name__ == '__main__':
             (r'/', IndexHandler),
             (r'/login', LoginHandler),
             (r'/logout', LogoutHandler),
-            # (r'/user/admin', IndexHandler),
             (r'/user/(?P<types>\w+)/(?P<page>\d+).html', UrlHandler),
             (r'/article/edit/(?P<id>\d+).html', ArticleEditHandler),
             (r'/article/(?P<type>\w+)/?(?P<page>\d+)?.html', ArticleHandler),
@@ -906,10 +912,10 @@ if __name__ == '__main__':
             (r'/links/(?P<type>\w+)/?(?P<page>\d+)?.html', LinksHandler),
             (r'/desc/(?P<type>\w+).html', DescriptionHandler),
             (r'/multi-delete/(?P<types>\w+).html', MultiDeleteHandler),
+            (r'/(?P<welcome>\w+).html', WelcomeHandler),
 
             # ueditor
             (r'/upload', UploadHandler),
-            # (r'/ueditor', UeditorHandler),
             (r'/static/(.*)', tornado.web.StaticFileHandler, {'path': 'static'}),
             (r'/upload/(.*)', tornado.web.StaticFileHandler, {'path': 'upload'}),
         ], **settings

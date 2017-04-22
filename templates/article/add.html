@@ -11,6 +11,8 @@
     <script type="text/javascript" charset="utf-8" src="{{ static_url('ueditor/lang/zh-cn/zh-cn.js') }}"></script>
     <link rel="stylesheet" href="/static/style/css/bootstrap-theme.min.css">
     <link rel="stylesheet" href="/static/style/css/bootstrap.min.css">
+        <link rel="stylesheet" href="/static/style/css/ch-ui.admin.css">
+    <link rel="stylesheet" href="/static/style/font/css/font-awesome.min.css">
     <style type="text/css">
         div {
             width: 100%;
@@ -25,6 +27,10 @@
     </style>
 </head>
 <body>
+<div class="crumb_warp">
+    <i class="fa fa-home"></i> <a href="#">首页</a> &raquo; <a href="#">文章管理</a> &raquo; 添加文章
+    <br>
+</div>
 <div style="width: 97%;margin: 0 auto;">
 {% try %}
     {% if article_info %}
