@@ -150,3 +150,16 @@ class Description(Base):
     id = Column(Integer, primary_key=True)
     content = Column(String(150))
     pub_date = Column(DateTime)
+
+
+class Rotate(Base):
+    __tablename__ = "rotates"
+    id = Column(Integer, primary_key=True)
+    title = Column(String(100))
+    description = Column(String(200))
+    pub_date = Column(DateTime)
+    img_src = Column(String(200))
+    article_src = Column(String(200))
+
+    def __repr__(self):
+        return "<%s rotates.name: %s" % (self.id, self.title)
