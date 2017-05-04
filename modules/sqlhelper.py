@@ -418,4 +418,6 @@ class SqlHelper(object):
         except Exception as e:
             return False
 
+    def __del__(self):
+        self.session.close()
 
