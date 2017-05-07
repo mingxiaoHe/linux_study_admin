@@ -11,7 +11,7 @@ from modules.common import turn_bytes_to_str, get_datetime
 
 class SqlHelper(object):
     def __init__(self):
-        self.engine = create_engine(SQLALCHEMY_DATABASE_URI, echo=True)
+        self.engine = create_engine(SQLALCHEMY_DATABASE_URI)
         Session = sessionmaker(bind=self.engine, autoflush=False, autocommit=False)
         self.session = Session()
 
@@ -324,6 +324,7 @@ class SqlHelper(object):
 
     def delete_tags(self, tags_list):
         # 删除标签，不删除标签下的文章
+        print(tags_list)
         try:
             for tag in self.session.query(Tag).filter(Tag.id.in_(tags_list)).all():
                 tag.articles.clear()
@@ -340,6 +341,7 @@ class SqlHelper(object):
             return True
         except Exception as e:
             return False
+
 
     def delete_categories(self, category_list):
         # 删除分类名，不删除分类下的文章
